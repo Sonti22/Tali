@@ -8,5 +8,5 @@ Crawl-delay: 1
 User-agent: Googlebot
 Allow: /
 
-Sitemap: https://talyi-village.netlify.app/sitemap.xml
-Host: talyi-village.netlify.app
+Sitemap: https://sonti22.github.io/Tali/sitemap.xml
+Host: sonti22.github.io/Tali

@@ -1,10 +1,10 @@
 /* Service Worker — кэширует HTML/JS/CSS/фото на длительный offline-просмотр */
-const VERSION = 'taly-1777222608219';
+const VERSION = 'taly-1777224008887';
 const PRECACHE = [
-  '/',
-  '/index.html',
-  '/hero.mp4',
-  '/manifest.json',
+  './',
+  './index.html',
+  './hero.mp4',
+  './manifest.json',
 ];
 
 self.addEventListener('install', (e) => {
@@ -30,7 +30,7 @@ self.addEventListener('fetch', (e) => {
         const copy = r.clone();
         caches.open(VERSION).then(c => c.put(e.request, copy));
         return r;
-      }).catch(() => caches.match(e.request).then(r => r || caches.match('/index.html')))
+      }).catch(() => caches.match(e.request).then(r => r || caches.match('./index.html')))
     );
     return;
   }
