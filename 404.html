@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <title>404 — заплутали в тальнике · Талы</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23f4ead5' stroke='%233d4f30' stroke-width='1.5'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='serif' font-style='italic' font-size='18' fill='%233d4f30'%3EТ%3C/text%3E%3C/svg%3E"/>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&family=PT+Serif:ital,wght@0,400;1,400&display=swap');
+    :root {
+      --paper: #f4ead5;
+      --paper-2: #ede1c5;
+      --moss-2: #3d4f30;
+      --wood-4: #3d2f1f;
+      --accent: #8b4a2b;
+      --ink-2: #4a3826;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--paper);
+      color: var(--wood-4);
+      font-family: 'PT Serif', Georgia, serif;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px;
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(139,111,71,0.05) 0 1px, transparent 2px),
+        radial-gradient(circle at 70% 60%, rgba(139,111,71,0.05) 0 1px, transparent 2px);
+      background-size: 13px 17px, 19px 23px;
+    }
+    .frame {
+      max-width: 600px; text-align: center;
+      padding: 60px 40px;
+      border: 2px double var(--moss-2);
+      background: var(--paper-2);
+      position: relative;
+    }
+    .frame::before, .frame::after {
+      content: '※'; position: absolute;
+      font-size: 24px; color: var(--moss-2);
+      top: -16px; background: var(--paper); padding: 0 8px;
+    }
+    .frame::before { left: 30px; }
+    .frame::after { right: 30px; }
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(64px, 16vw, 120px);
+      font-style: italic; font-weight: 500;
+      color: var(--accent);
+      line-height: 0.9;
+    }
+    .eyebrow {
+      font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--moss-2); margin: 16px 0 18px;
+      font-family: system-ui, sans-serif; font-weight: 500;
+    }
+    h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(24px, 4vw, 32px);
+      font-style: italic; font-weight: 500;
+      color: var(--wood-4); margin-bottom: 20px;
+    }
+    p {
+      font-size: 15px; line-height: 1.65; color: var(--ink-2);
+      margin-bottom: 26px; font-style: italic;
+    }
+    a {
+      display: inline-block;
+      padding: 12px 24px;
+      background: var(--moss-2); color: var(--paper);
+      text-decoration: none;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic; font-weight: 700; font-size: 16px;
+      letter-spacing: 0.05em;
+      border: 1px solid var(--moss-2);
+      transition: all 0.2s;
+    }
+    a:hover { background: var(--accent); border-color: var(--accent); }
+    svg { display: block; margin: 0 auto 16px; }
+  </style>
+</head>
+<body>
+  <main class="frame">
+    <svg viewBox="0 0 200 320" width="100" height="160">
+      <g fill="none" stroke="#3d4f30" stroke-width="1.5">
+        <path d="M100 10 Q92 90 105 170 Q118 240 100 310"/>
+        <path d="M100 50 Q70 60 50 50"/>
+        <path d="M104 90 Q140 100 160 90"/>
+        <path d="M102 130 Q70 145 45 135"/>
+        <path d="M108 175 Q145 185 175 175"/>
+        <path d="M104 220 Q70 230 50 218"/>
+      </g>
+    </svg>
+    <h1>404</h1>
+    <div class="eyebrow">страница не найдена</div>
+    <h2>Заплутали в тальнике</h2>
+    <p>Этой страницы в нашей книге нет. Может, вы свернули не туда среди излук Богучарки. Возвращайтесь к началу — там и продолжим.</p>
+    <a href="/">← вернуться к Талам</a>
+  </main>
+</body>
+</html>

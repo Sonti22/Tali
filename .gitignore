@@ -1,0 +1,10 @@
+node_modules/
+.playwright-mcp/
+*.tmp
+*.compressed.jpg
+*.compressed.png
+.DS_Store
+*.log
+.env
+.env.local
+.netlify/

@@ -1,0 +1,255 @@
+/* ========================================================
+   Талы — общая система. Тёплая бежево-древесная палитра.
+   ======================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=PT+Serif:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&family=Lobster&family=Marck+Script&family=Tinos:ital,wght@0,400;0,700;1,400&display=swap');
+/* Старославянский / уставной — Old Standard TT хорошо читается, но настоящий устав мы подмешиваем через SVG-стилизацию + тонкие декоративные линии. Для заголовка «Талы» используем кастомный путь. */
+
+:root {
+  /* Бежевые тона */
+  --paper: #f4ead5;       /* основной фон, слоновая кость */
+  --paper-2: #ede1c5;     /* чуть глубже */
+  --paper-3: #e3d3b0;     /* ещё глубже */
+  --linen: #ebe0c6;
+  --cream: #faf3e0;
+
+  /* Древесина */
+  --wood-1: #c9a875;      /* светлое дерево */
+  --wood-2: #8b6f47;      /* среднее дерево */
+  --wood-3: #5c4527;      /* тёмное дерево */
+  --wood-4: #3d2f1f;      /* почти чёрный, кора */
+
+  /* Текст */
+  --ink: #2a1f15;
+  --ink-2: #4a3826;
+  --ink-soft: #6b5538;
+
+  /* Акценты сдержанные */
+  --accent: #8b4a2b;      /* кирпичный, для меток */
+  --accent-soft: #b8845d;
+
+  /* Тёмно-зелёные — мох, хвоя, ель в речной долине */
+  --moss-1: #2d3a24;      /* очень тёмный, почти чёрно-зелёный */
+  --moss-2: #3d4f30;      /* основной тёмно-зелёный */
+  --moss-3: #56683f;      /* средний */
+  --moss-4: #7a8a5a;      /* выцветший травяной */
+  --moss-5: #b8c298;      /* светлый, для штрихов на тёмном фоне */
+
+  /* Линии */
+  --hairline: rgba(60, 40, 20, 0.18);
+  --hairline-2: rgba(60, 40, 20, 0.32);
+
+  /* Шрифты */
+  --serif-display: 'Cormorant Garamond', 'Times New Roman', serif;
+  --serif-text: 'PT Serif', Georgia, serif;
+  --sans: 'Inter', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  font-family: var(--serif-text);
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ====== Текстура "дерево" — тонкие полосы ====== */
+.wood-grain {
+  background-color: var(--wood-2);
+  background-image:
+    repeating-linear-gradient(90deg,
+      rgba(0,0,0,0.06) 0 1px, transparent 1px 3px,
+      rgba(255,255,255,0.04) 3px 4px, transparent 4px 9px),
+    repeating-linear-gradient(90deg,
+      rgba(0,0,0,0.10) 0 2px, transparent 2px 60px),
+    radial-gradient(ellipse 200% 60% at 50% 50%, rgba(255,255,255,0.06), transparent 70%);
+}
+.wood-grain.dark {
+  background-color: var(--wood-3);
+}
+.wood-grain.light {
+  background-color: var(--wood-1);
+}
+
+/* ====== Бумажная текстура ====== */
+.paper-tex {
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(139,111,71,0.04) 0 1px, transparent 2px),
+    radial-gradient(circle at 70% 60%, rgba(139,111,71,0.05) 0 1px, transparent 2px),
+    radial-gradient(circle at 40% 80%, rgba(139,111,71,0.03) 0 1px, transparent 2px),
+    radial-gradient(ellipse 100% 100% at 50% 0%, rgba(60,40,20,0.04), transparent 70%);
+  background-size: 13px 17px, 19px 23px, 11px 13px, 100% 100%;
+}
+
+/* ====== Тонкие линейные орнаменты ====== */
+.ornament-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--wood-2);
+}
+.ornament-divider::before,
+.ornament-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.4;
+}
+.ornament-diamond {
+  width: 8px; height: 8px;
+  background: currentColor;
+  transform: rotate(45deg);
+  flex: 0 0 auto;
+}
+
+/* SVG орнамент-разделитель */
+.ornament-line {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto;
+  color: var(--wood-2);
+}
+
+/* ====== Типографика ====== */
+.eyebrow {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.h-display {
+  font-family: var(--serif-display);
+  font-weight: 500;
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.dropcap::first-letter {
+  font-family: var(--serif-display);
+  font-weight: 600;
+  font-size: 4em;
+  float: left;
+  line-height: 0.85;
+  padding: 4px 8px 0 0;
+  color: var(--wood-3);
+}
+
+/* Скроллбары */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--paper-2); }
+::-webkit-scrollbar-thumb { background: var(--wood-2); border-radius: 6px; border: 2px solid var(--paper-2); }
+::-webkit-scrollbar-thumb:hover { background: var(--wood-3); }
+
+/* Утилиты */
+.btn-wood {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px;
+  background: var(--wood-3);
+  color: var(--paper);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-wood:hover { background: var(--wood-4); }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px;
+  background: transparent;
+  color: var(--wood-3);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border: 1px solid var(--wood-3);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-ghost:hover { background: var(--wood-3); color: var(--paper); }
+
+/* Карусель — общие стили */
+.carousel-frame {
+  position: relative;
+  overflow: hidden;
+}
+.carousel-track {
+  display: flex;
+  gap: 18px;
+  transition: transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: transform;
+}
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  background: var(--paper);
+  border: 1px solid var(--hairline-2);
+  color: var(--wood-3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  transition: all 0.2s;
+}
+.carousel-arrow:hover { background: var(--wood-3); color: var(--paper); border-color: var(--wood-3); }
+.carousel-arrow.left { left: 12px; }
+.carousel-arrow.right { right: 12px; }
+.carousel-arrow:disabled { opacity: 0.35; cursor: default; }
+.carousel-arrow:disabled:hover { background: var(--paper); color: var(--wood-3); border-color: var(--hairline-2); }
+
+/* Плейсхолдер изображения */
+.img-placeholder {
+  position: relative;
+  background:
+    repeating-linear-gradient(135deg,
+      rgba(139,111,71,0.10) 0 2px,
+      transparent 2px 12px),
+    linear-gradient(180deg, var(--paper-3), var(--paper-2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-soft);
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 16px;
+  overflow: hidden;
+}
+.img-placeholder::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(60,40,20,0.18);
+  pointer-events: none;
+}
+.img-placeholder span { position: relative; z-index: 1; max-width: 80%; line-height: 1.5; }
+
+/* Анимация мягкого появления */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) both; }
