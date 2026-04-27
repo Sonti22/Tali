@@ -1,10 +1,14 @@
 /* Service Worker — кэширует HTML/JS/CSS/фото на длительный offline-просмотр */
-const VERSION = 'taly-1777224008887';
+const VERSION = 'taly-1777287988085';
 const PRECACHE = [
   './',
   './index.html',
   './hero.mp4',
   './manifest.json',
+  '/Tali/index.html',
+  '/Tali/styles.css',
+  '/Tali/manifest.json',
+  '/Tali/hero.mp4',
 ];
 
 self.addEventListener('install', (e) => {

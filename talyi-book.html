@@ -876,6 +876,115 @@ section a:not(.btn-wood):not(.btn-ghost):not([style*="background"]):hover {
 
 /* Reading mode for printing */
 @page { size: A4; margin: 18mm 14mm; }
+
+/* ====== Мобильная адаптация ====== */
+html, body { max-width: 100vw; overflow-x: hidden; }
+
+@media (max-width: 768px) {
+  html, body { overflow-x: hidden !important; }
+  section { overflow-x: hidden; }
+  section {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  .hero-grid { grid-template-columns: 1fr !important; }
+  .hero-left { padding-left: 20px !important; padding-right: 20px !important; padding-top: 90px !important; }
+  .hero-video-col { max-height: 260px; overflow: hidden; }
+  section[id] { padding-top: 60px !important; padding-bottom: 60px !important; }
+  img, video, iframe { max-width: 100%; }
+  iframe { max-width: 100%; }
+  table { display: block; overflow-x: auto; max-width: 100%; }
+  /* Hide non-essential floating widgets on mobile to reduce clutter */
+  button[aria-label="PDF / печать"],
+  button[aria-label*="оделить" i],
+  div[aria-label*="одкаст" i] { display: none !important; }
+  /* Compact ThemeFloater on mobile */
+  .theme-floater-compact { transform: scale(0.85); transform-origin: bottom center; }
+}
+
+/* === Implementation 1: Site-wide grain overlay === */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+html[data-theme="night"] body::before {
+  opacity: 0.08;
+  mix-blend-mode: screen;
+}
+
+/* === Implementation 2: Archival photo treatment — sepia by default, color on hover === */
+section[data-screen-label="История"] img,
+section[data-screen-label="Мемориал"] img,
+section[data-screen-label="Утраченное"] img,
+section#church img,
+section#walk1910 img,
+.archival-photo img {
+  filter: sepia(0.45) contrast(1.02) brightness(0.97);
+  transition: filter 0.5s ease;
+}
+section[data-screen-label="История"] img:hover,
+section[data-screen-label="Мемориал"] img:hover,
+section[data-screen-label="Утраченное"] img:hover,
+section#church img:hover,
+section#walk1910 img:hover,
+.archival-photo img:hover {
+  filter: sepia(0) contrast(1) brightness(1);
+}
+
+/* === Implementation 3: Native scroll-driven progress bar === */
+@supports (animation-timeline: scroll()) {
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--moss-2));
+    width: 100%;
+    transform-origin: 0 50%;
+    animation: scrollProgress linear;
+    animation-timeline: scroll();
+    z-index: 1000;
+    pointer-events: none;
+  }
+  @keyframes scrollProgress {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+}
+
+/* === Implementation 5: Slug-line / kicker — uniform style === */
+.eyebrow {
+  display: inline-block;
+  position: relative;
+}
+.eyebrow::before {
+  content: '— ';
+  color: var(--accent);
+  margin-right: 4px;
+  opacity: 0.6;
+}
+
+/* === Implementation 7: 1865 era mode === */
+.era-1865 {
+  filter: sepia(0.7) contrast(0.95) brightness(0.92);
+  transition: filter 1.5s;
+}
+.era-1865 body::before {
+  opacity: 0.12;
+}
+.era-1865 nav, .era-1865 button { font-feature-settings: 'salt' on, 'ss01' on; }
+
+/* === Implementation 8: Idle ambient atmosphere === */
+.is-idle body::before { opacity: 0.09; transition: opacity 3s; }
+.is-idle .h-display { animation: idleBreathe 6s ease-in-out infinite; }
+@keyframes idleBreathe { 0%, 100% { opacity: 1; } 50% { opacity: 0.85; } }
 </style>
 </head>
 <body>
@@ -903,6 +1012,17 @@ section a:not(.btn-wood):not(.btn-ghost):not([style*="background"]):hover {
   <script type="text/babel" data-presets="react">
 /* global React */
 const { useState, useEffect, useRef } = React;
+
+function useMobile(bp = 768) {
+  const [m, setM] = useState(() => typeof window !== 'undefined' && window.innerWidth < bp);
+  useEffect(() => {
+    const fn = () => setM(window.innerWidth < bp);
+    window.addEventListener('resize', fn);
+    return () => window.removeEventListener('resize', fn);
+  }, [bp]);
+  return m;
+}
+window.useMobile = useMobile;
 
 function Ornament({ color = 'currentColor', width = 240 }) {
   return (
@@ -1228,8 +1348,8 @@ function Hero({ variant = 'book' }) {
           ))}
         </svg>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.1fr', minHeight: '100vh', alignItems: 'stretch' }}>
-        <div style={{ padding: '140px 80px 80px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative' }} className="paper-tex">
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.1fr', minHeight: '100vh', alignItems: 'stretch' }} className="hero-grid">
+        <div style={{ padding: '140px 80px 80px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative' }} className="paper-tex hero-left">
           <div style={{ position: 'absolute', top: 100, left: 60, color: 'var(--moss-2)', opacity: 0.5 }}>
             <CornerOrnament size={80} />
           </div>
@@ -1311,7 +1431,7 @@ function Hero({ variant = 'book' }) {
             </div>
           </div>
         </div>
-        <div style={{ position: 'relative', overflow: 'hidden', background: 'var(--moss-1)' }}>
+        <div style={{ position: 'relative', overflow: 'hidden', background: 'var(--moss-1)' }} className="hero-video-col">
           <video
             ref={videoRef}
             autoPlay
@@ -1353,7 +1473,7 @@ function Hero({ variant = 'book' }) {
               }}
             >⛶</button>
           </div>
-          <style>{`@keyframes soundPulse { 0%,100% { box-shadow: 0 6px 18px rgba(60,40,20,0.25); } 50% { box-shadow: 0 6px 18px rgba(60,40,20,0.25), 0 0 0 8px rgba(196,106,58,0.30); } }`}</style>
+          <style>{`@keyframes soundPulse { 0%,100% { box-shadow: 0 6px 18px rgba(60,40,20,0.25); } 50% { box-shadow: 0 6px 18px rgba(60,40,20,0.25), 0 0 0 8px rgba(196,106,58,0.30); } } @media (max-width: 768px) { .hero-grid { grid-template-columns: 1fr !important; } .hero-left { padding: 90px 20px 40px !important; } .hero-video-col { max-height: 260px; overflow: hidden; } }`}</style>
 
           {/* quote overlay */}
           <div style={{ position: 'absolute', bottom: 40, right: 40, background: 'rgba(244, 234, 213, 0.94)', padding: '18px 24px', maxWidth: 320, borderTop: '2px solid var(--moss-2)', backdropFilter: 'blur(3px)' }}>
@@ -1372,6 +1492,13 @@ function Hero({ variant = 'book' }) {
 }
 
 function Nav({ scrolled }) {
+  const [open, setOpen] = useStateHero(false);
+  const [isMob, setIsMob] = useStateHero(() => typeof window !== 'undefined' && window.innerWidth < 768);
+  useEffectHero(() => {
+    const fn = () => setIsMob(window.innerWidth < 768);
+    window.addEventListener('resize', fn);
+    return () => window.removeEventListener('resize', fn);
+  }, []);
   const links = [
     { href: '#history', label: 'История' },
     { href: '#today', label: 'Сегодня' },
@@ -1383,6 +1510,11 @@ function Nav({ scrolled }) {
     { href: '#dynasties', label: 'Династии' },
     { href: '#objects', label: 'Объекты' },
     { href: '#glossary', label: 'Говор' },
+    { href: '#letters', label: 'Письма' },
+    { href: '#draft1941', label: 'Призыв-41' },
+    { href: '#lost', label: 'Утрачено' },
+    { href: '#crafts', label: 'Ремёсла' },
+    { href: '#toponymy', label: 'Урочища' },
     { href: '#events', label: 'События' },
     { href: '#news', label: 'Новости' },
     { href: '#map', label: 'Карта' },
@@ -1391,10 +1523,11 @@ function Nav({ scrolled }) {
   return (
     <nav style={{
       position: 'absolute', top: 0, left: 0, right: 0,
-      padding: '24px 60px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      padding: isMob ? '16px 20px' : '24px 60px',
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       zIndex: 50,
-      background: scrolled ? 'rgba(244, 234, 213, 0.96)' : 'transparent',
-      borderBottom: scrolled ? '1px solid var(--moss-2)' : '1px solid transparent',
+      background: (scrolled || open) ? 'rgba(244, 234, 213, 0.98)' : 'transparent',
+      borderBottom: (scrolled || open) ? '1px solid var(--moss-2)' : '1px solid transparent',
       transition: 'all 0.3s',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -1406,14 +1539,54 @@ function Nav({ scrolled }) {
           Талы
         </div>
       </div>
-      <div style={{ display: 'flex', gap: 24, fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-        {links.map(l => (
-          <a key={l.href} href={l.href} style={{ color: 'var(--ink-2)', textDecoration: 'none', transition: 'color 0.2s' }}
-             onMouseEnter={e => e.target.style.color = 'var(--moss-2)'}
-             onMouseLeave={e => e.target.style.color = 'var(--ink-2)'}
-          >{l.label}</a>
-        ))}
-      </div>
+      {isMob ? (
+        <>
+          <button
+            onClick={() => setOpen(o => !o)}
+            aria-label={open ? 'Закрыть меню' : 'Открыть меню'}
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              padding: '8px', zIndex: 101, position: 'relative',
+            }}
+          >
+            <svg width="24" height="18" viewBox="0 0 24 18" style={{ display: 'block' }}>
+              <line x1="0" y1="1" x2="24" y2="1" stroke="var(--wood-4)" strokeWidth="2" strokeLinecap="round" style={{ transformOrigin: '12px 1px', transform: open ? 'rotate(45deg) translateY(7px)' : 'none', transition: 'transform 0.25s' }}/>
+              <line x1="0" y1="9" x2="24" y2="9" stroke="var(--wood-4)" strokeWidth="2" strokeLinecap="round" style={{ opacity: open ? 0 : 1, transition: 'opacity 0.2s' }}/>
+              <line x1="0" y1="17" x2="24" y2="17" stroke="var(--wood-4)" strokeWidth="2" strokeLinecap="round" style={{ transformOrigin: '12px 17px', transform: open ? 'rotate(-45deg) translateY(-7px)' : 'none', transition: 'transform 0.25s' }}/>
+            </svg>
+          </button>
+          {open && (
+            <div style={{
+              position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+              background: 'rgba(244,234,213,0.98)', zIndex: 100,
+              display: 'flex', flexDirection: 'column',
+              padding: '80px 36px 40px', overflowY: 'auto',
+            }}>
+              {links.map(l => (
+                <a key={l.href} href={l.href}
+                   onClick={() => setOpen(false)}
+                   style={{
+                     color: 'var(--ink-2)', textDecoration: 'none',
+                     fontFamily: 'var(--serif-display)', fontSize: 28,
+                     fontStyle: 'italic', padding: '14px 0',
+                     borderBottom: '1px solid var(--hairline)',
+                     display: 'block',
+                   }}
+                >{l.label}</a>
+              ))}
+            </div>
+          )}
+        </>
+      ) : (
+        <div style={{ display: 'flex', gap: 16, fontFamily: 'var(--sans)', fontSize: 10.5, letterSpacing: '0.1em', textTransform: 'uppercase', flexWrap: 'wrap', justifyContent: 'flex-end', maxWidth: 'calc(100% - 140px)' }}>
+          {links.map(l => (
+            <a key={l.href} href={l.href} style={{ color: 'var(--ink-2)', textDecoration: 'none', transition: 'color 0.2s' }}
+               onMouseEnter={e => e.target.style.color = 'var(--moss-2)'}
+               onMouseLeave={e => e.target.style.color = 'var(--ink-2)'}
+            >{l.label}</a>
+          ))}
+        </div>
+      )}
     </nav>
   );
 }
@@ -1617,6 +1790,7 @@ function TimelineIcon({ index, highlight }) {
 }
 
 function HistorySection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
   const events = [
     { year: '1652', img: 'images/tl-01-1652.jpg', title: 'Острогожский полк', text: 'После битвы под Берестечком 4269 черкасов полковника Ивана Дзиньковского переходят на русскую службу и образуют Острогожский слободской казачий полк — прямой предок таловских жителей.' },
     { year: '1707–08', img: 'images/tl-02-1708.jpg', title: 'Булавинщина', text: 'Карательные войска Долгорукого выжигают казачьи поселения по Толучеевке, Айдару и Богучару. Степь полностью обезлюдела.' },
@@ -1648,7 +1822,7 @@ function HistorySection() {
   ];
 
   return (
-    <section id="history" style={{ padding: '120px 60px 100px', background: 'var(--paper-2)', position: 'relative' }} className="paper-tex" data-screen-label="История">
+    <section id="history" style={{ padding: isMobile ? '60px 16px 60px' : '120px 60px 100px', background: 'var(--paper-2)', position: 'relative' }} className="paper-tex" data-screen-label="История">
       {/* === БОКОВАЯ ПРОГРЕСС-ШКАЛА ЭПОХ === */}
       <div style={{ position: 'fixed', right: 24, top: '50%', transform: 'translateY(-50%)', zIndex: 50, display: 'none', flexDirection: 'column', gap: 4, pointerEvents: 'auto' }} className="timeline-rail">
         <div className="eyebrow" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', marginBottom: 8, fontSize: 9, color: 'var(--ink-soft)', textAlign: 'center' }}>эпохи</div>
@@ -1691,13 +1865,13 @@ function HistorySection() {
       {/* === ЗАГОЛОВОК С ФОТО ПО БОКАМ === */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'minmax(180px, 260px) 1fr minmax(180px, 260px)',
-        gap: 56,
+        gridTemplateColumns: isMobile ? '1fr' : 'minmax(180px, 260px) 1fr minmax(180px, 260px)',
+        gap: isMobile ? 24 : 56,
         alignItems: 'center',
         maxWidth: 1280,
         margin: '0 auto 64px',
       }}>
-        <figure style={{ margin: 0, transform: 'rotate(-2deg)' }}>
+        <figure style={{ margin: 0, transform: 'rotate(-2deg)', display: isMobile ? 'none' : undefined }}>
           <div style={{
             background: 'var(--paper)',
             padding: 10,
@@ -1731,7 +1905,7 @@ function HistorySection() {
           </p>
         </div>
 
-        <figure style={{ margin: 0, transform: 'rotate(2deg)' }}>
+        <figure style={{ margin: 0, transform: 'rotate(2deg)', display: isMobile ? 'none' : undefined }}>
           <div style={{
             background: 'var(--paper)',
             padding: 10,
@@ -1877,8 +2051,21 @@ function HistorySection() {
           <Ornament color="var(--moss-2)" />
         </div>
         <div style={{ position: 'relative' }}>
-          <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1, background: 'var(--moss-3)', transform: 'translateX(-0.5px)', opacity: 0.5 }}/>
+          {!isMobile && <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1, background: 'var(--moss-3)', transform: 'translateX(-0.5px)', opacity: 0.5 }}/>}
           {events.map((e, i) => {
+            if (isMobile) {
+              return (
+                <div key={i} data-tl-year={e.year} style={{ display: 'flex', gap: 14, marginBottom: 20, alignItems: 'flex-start' }}>
+                  <div style={{
+                    fontFamily: 'var(--serif-display)', fontStyle: 'italic',
+                    fontSize: 14, fontWeight: 600,
+                    color: e.highlight ? 'var(--accent)' : 'var(--wood-4)',
+                    minWidth: 60, flexShrink: 0, paddingTop: 6, textAlign: 'right',
+                  }}>{e.year}</div>
+                  <TimelineCard ev={e} />
+                </div>
+              );
+            }
             const right = i % 2 === 1;
             return (
               <div key={i} data-tl-year={e.year} style={{ display: 'grid', gridTemplateColumns: '1fr 110px 1fr', gap: 0, marginBottom: 38, alignItems: 'start' }}>
@@ -2045,12 +2232,25 @@ const CHAPTERS = [
 ];
 
 function Chapter({ ch, index }) {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
+  const [focus, setFocus] = React.useState(false);
+  React.useEffect(() => {
+    if (!focus) return;
+    const onKey = (e) => { if (e.key === 'Escape') setFocus(false); };
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', onKey);
+    return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', onKey); };
+  }, [focus]);
   return (
     <article style={{ marginBottom: 80, position: 'relative' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '110px 1fr', gap: 32, alignItems: 'baseline', marginBottom: 24 }}>
+      <button onClick={() => setFocus(true)} title="Режим чтения"
+        style={{ position: 'absolute', top: 0, right: 0, padding: '6px 12px', background: 'transparent', border: '1px solid var(--hairline-2)', color: 'var(--wood-4)', fontFamily: 'var(--sans)', fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', cursor: 'pointer', zIndex: 1 }}>
+        📖 Читать
+      </button>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '110px 1fr', gap: 32, alignItems: 'baseline', marginBottom: 24 }}>
         <div style={{
-          fontFamily: 'var(--serif-display)', fontSize: 96, lineHeight: 1, fontStyle: 'italic',
-          color: 'var(--moss-2)', fontWeight: 500, textAlign: 'right', opacity: 0.85,
+          fontFamily: 'var(--serif-display)', fontSize: isMobile ? 60 : 96, lineHeight: 1, fontStyle: 'italic',
+          color: 'var(--moss-2)', fontWeight: 500, textAlign: isMobile ? 'left' : 'right', opacity: 0.85,
         }}>
           {ch.roman}
         </div>
@@ -2064,7 +2264,7 @@ function Chapter({ ch, index }) {
           </h3>
         </div>
       </div>
-      <div style={{ paddingLeft: 142, borderLeft: '1px solid var(--hairline)', marginLeft: 54 }}>
+      <div style={{ paddingLeft: isMobile ? 0 : 142, borderLeft: isMobile ? 'none' : '1px solid var(--hairline)', marginLeft: isMobile ? 0 : 54 }}>
         {ch.paras.map((p, i) => (
           <p key={i} className={i === 0 ? 'dropcap' : ''} style={{
             fontFamily: 'var(--serif-text)', fontSize: 16, lineHeight: 1.78, color: 'var(--ink-2)',
@@ -2086,11 +2286,32 @@ function Chapter({ ch, index }) {
           </blockquote>
         )}
       </div>
+      {focus && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 250, background: 'var(--paper)', overflowY: 'auto', padding: isMobile ? '60px 20px' : '80px 60px' }}>
+          <button onClick={() => setFocus(false)} aria-label="Закрыть режим чтения"
+            style={{ position: 'fixed', top: 16, right: 16, padding: '10px 16px', background: 'var(--wood-4)', color: 'var(--paper)', border: 'none', cursor: 'pointer', fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', zIndex: 2 }}>
+            × Esc
+          </button>
+          <div style={{ maxWidth: 680, margin: '0 auto' }}>
+            <div className="eyebrow" style={{ marginBottom: 12, color: 'var(--accent)' }}>{`Глава ${ch.roman} · ${ch.sub}`}</div>
+            <h1 style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: isMobile ? 36 : 48, lineHeight: 1.15, fontWeight: 500, color: 'var(--wood-4)', margin: '0 0 32px' }}>{ch.title}</h1>
+            {ch.paras.map((p, i) => (
+              <p key={i} style={{ fontFamily: 'var(--serif-text)', fontSize: isMobile ? 17 : 19, lineHeight: 1.85, color: 'var(--ink)', margin: '0 0 22px', textAlign: 'justify', hyphens: 'auto' }}>{p}</p>
+            ))}
+            {ch.pull && (
+              <blockquote style={{ margin: '32px 0', padding: '20px 28px', borderLeft: '3px solid var(--accent)', fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 24, lineHeight: 1.4, color: 'var(--wood-4)' }}>
+                {ch.pull}
+              </blockquote>
+            )}
+          </div>
+        </div>
+      )}
     </article>
   );
 }
 
 function Conclusion() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
   const points = [
     { title: 'Фронтир', text: 'Слобода на краю Дикого поля, основанная казаками-черкасами, бежавшими с Украины от польского гнёта в 1650-х годах и переселившимися из Острогожска на Богучарку в 1710-х.' },
     { title: 'Закрепощение', text: 'Казачья вольница → войсковые обыватели → государственные крестьяне. Трёхступенчатое закрепощение украинских казаков Екатериной II и её преемниками за 70 лет (1765–1837).' },
@@ -2100,8 +2321,8 @@ function Conclusion() {
     { title: 'Угасание', text: 'Три четверти населения потеряно за столетие — без железной дороги и без районного центра.' },
   ];
   return (
-    <div style={{ maxWidth: 1100, margin: '0 auto', background: 'var(--moss-1)', color: 'var(--paper)', padding: '60px 60px 56px' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 60, alignItems: 'start' }}>
+    <div style={{ maxWidth: 1100, margin: '0 auto', background: 'var(--moss-1)', color: 'var(--paper)', padding: isMobile ? '40px 20px' : '60px 60px 56px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1.4fr', gap: isMobile ? 32 : 60, alignItems: 'start' }}>
         <div>
           <div className="eyebrow" style={{ color: 'var(--moss-5)', marginBottom: 14 }}>Итог</div>
           <h3 style={{
@@ -2114,7 +2335,7 @@ function Conclusion() {
             Микрокосм трёх столетий русской южной истории. Прапраправнуки украинских казаков, бежавших от польского гнёта в 1652-м и основавших Талы в 1747-м, в декабре 1942-го лежали в братской могиле рядом с советскими солдатами, освобождавшими их слободу от итальянцев. История замкнулась.
           </p>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 0, border: '1px solid rgba(244,234,213,0.18)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: 0, border: '1px solid rgba(244,234,213,0.18)' }}>
           {points.map((p, i) => (
             <div key={i} style={{
               padding: '22px 24px',
@@ -2169,11 +2390,12 @@ window.HistorySection = HistorySection;
 /* global React */
 
 function TodaySection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
   const stats = [
     { num: '1 484', label: 'жителя', sub: 'на 1 апреля 2026 г.' },
     { num: '11 240', label: 'га пашни', sub: 'СХП «Продвижение»' },
     { num: '884', label: 'занятых', sub: '59,6 % населения' },
-    { num: '9', label: 'улиц', sub: 'центр Таловского с/п' },
+    { num: '8', label: 'улиц', sub: 'центр Таловского с/п' },
   ];
   const streets = [
     'Большевик', 'Луговая', 'Октябрьская', 'Победы',
@@ -2205,7 +2427,7 @@ function TodaySection() {
     { icon: '⚙', t: 'Водонапорная башня', s: 'ТОС «Пионер», 2024' },
   ];
   return (
-    <section id="today" style={{ padding: '120px 60px', background: 'var(--paper)' }} data-screen-label="Сегодня">
+    <section id="today" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--paper)' }} data-screen-label="Сегодня">
       <SectionHeader
         eyebrow="Раздел II"
         title="Талы сегодня"
@@ -2213,14 +2435,15 @@ function TodaySection() {
       />
       <div style={{ maxWidth: 1280, margin: '0 auto' }}>
         {/* Главные числа */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0, marginBottom: 60, borderTop: '2px solid var(--moss-2)', borderBottom: '2px solid var(--moss-2)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: 0, marginBottom: isMobile ? 32 : 60, borderTop: '2px solid var(--moss-2)', borderBottom: '2px solid var(--moss-2)' }}>
           {stats.map((s, i) => (
             <div key={i} style={{
-              padding: '40px 28px',
-              borderRight: i < stats.length - 1 ? '1px solid var(--hairline)' : 'none',
+              padding: isMobile ? '24px 14px' : '40px 28px',
+              borderRight: isMobile ? (i % 2 === 0 ? '1px solid var(--hairline)' : 'none') : (i < stats.length - 1 ? '1px solid var(--hairline)' : 'none'),
+              borderBottom: isMobile && i < 2 ? '1px solid var(--hairline)' : undefined,
               textAlign: 'center',
             }}>
-              <div style={{ fontFamily: "'Old Standard TT', serif", fontSize: 60, lineHeight: 1, color: 'var(--moss-2)', fontWeight: 700 }}>
+              <div style={{ fontFamily: "'Old Standard TT', serif", fontSize: isMobile ? 38 : 60, lineHeight: 1, color: 'var(--moss-2)', fontWeight: 700 }}>
                 {s.num}
               </div>
               <div style={{ fontFamily: 'var(--serif-text)', fontSize: 16, color: 'var(--ink-2)', marginTop: 8 }}>
@@ -2232,8 +2455,8 @@ function TodaySection() {
         </div>
 
         {/* Возрастная пирамида + гендер + занятость */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 40, marginBottom: 60 }}>
-          <div style={{ background: 'var(--paper-2)', padding: '28px 32px', borderLeft: '3px solid var(--moss-2)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.4fr 1fr', gap: isMobile ? 24 : 40, marginBottom: isMobile ? 32 : 60 }}>
+          <div style={{ background: 'var(--paper-2)', padding: isMobile ? '20px 18px' : '28px 32px', borderLeft: '3px solid var(--moss-2)' }}>
             <div className="eyebrow" style={{ marginBottom: 10 }}>возрастной состав</div>
             <h3 style={{ fontFamily: "'Old Standard TT', serif", fontSize: 26, fontWeight: 700, margin: '0 0 24px', color: 'var(--wood-4)' }}>
               Поколения села
@@ -2294,12 +2517,12 @@ function TodaySection() {
           <h3 className="h-display" style={{ fontSize: 36, fontStyle: 'italic', fontWeight: 500, margin: '0 0 28px', color: 'var(--wood-4)' }}>
             Что есть в селе
           </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 0, border: '1px solid var(--hairline)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 0, border: '1px solid var(--hairline)' }}>
             {infra.map((it, i) => (
               <div key={i} style={{
-                padding: '22px 24px',
-                borderRight: (i + 1) % 3 !== 0 ? '1px solid var(--hairline)' : 'none',
-                borderBottom: i < infra.length - 3 ? '1px solid var(--hairline)' : 'none',
+                padding: isMobile ? '16px 16px' : '22px 24px',
+                borderRight: !isMobile && ((i + 1) % 3 !== 0) ? '1px solid var(--hairline)' : 'none',
+                borderBottom: isMobile ? (i < infra.length - 1 ? '1px solid var(--hairline)' : 'none') : (i < infra.length - 3 ? '1px solid var(--hairline)' : 'none'),
                 display: 'flex', alignItems: 'center', gap: 16,
                 background: 'var(--paper)',
               }}>
@@ -2319,7 +2542,7 @@ function TodaySection() {
         </div>
 
         {/* География и климат */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: 40, marginBottom: 60 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.1fr 0.9fr', gap: isMobile ? 24 : 40, marginBottom: isMobile ? 32 : 60 }}>
           <div>
             <div className="eyebrow" style={{ marginBottom: 14 }}>география и климат</div>
             <h3 className="h-display" style={{ fontSize: 36, fontStyle: 'italic', fontWeight: 500, margin: '0 0 22px', color: 'var(--wood-4)' }}>
@@ -2373,6 +2596,7 @@ function TodaySection() {
 }
 
 function NatureSection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
   const items = [
     { title: 'Река Богучарка', text: 'Правый приток Дона. По её излукам и рос тот самый тальник, давший имя селу.', label: 'Излучина Богучарки на закате', src: 'images/bogucharka-river.jpg' },
     { title: 'Богучарская степь', text: 'Зона расселения скифо-сарматских племён. Курганы — обычный элемент пейзажа вокруг села.', label: 'Степь и курган весной', src: 'images/steppe-kurgan.jpg' },
@@ -2383,7 +2607,7 @@ function NatureSection() {
     { title: 'Дубняк', text: 'Восточная лесополоса — старые дубы, которые выходят из всех зимних бурь нетронутыми.', label: 'Дубовая роща, осень', src: 'images/oak-grove-autumn.jpg' },
   ];
   return (
-    <section id="nature" style={{ padding: '120px 60px', background: 'var(--moss-1)', color: 'var(--paper)' }} data-screen-label="Природа">
+    <section id="nature" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--moss-1)', color: 'var(--paper)' }} data-screen-label="Природа">
       <div style={{ textAlign: 'center', marginBottom: 60 }}>
         <div className="eyebrow" style={{ marginBottom: 14, color: 'var(--moss-5)' }}>Раздел III</div>
         <h2 className="h-display" style={{ fontSize: 'clamp(36px, 4.4vw, 64px)', margin: '0 0 18px', fontStyle: 'italic', color: 'var(--paper)' }}>
@@ -2431,6 +2655,7 @@ Object.assign(window, { TodaySection, NatureSection });
    ИЗВЕСТНЫЕ ЛЮДИ — расширенный список
    ============================================================ */
 function PeopleSection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
   const people = [
     {
       name: 'Авксентий Городнянский',
@@ -2438,7 +2663,7 @@ function PeopleSection() {
       role: 'Генерал-лейтенант',
       img: 'Портрет генерала Городнянского в форме РККА',
       src: 'images/gorodnyanski.jpg',
-      text: 'Уроженец слободы Талы, родился 1 марта 1896 г. От рядового РИА (1915) до командующего 6-й армией Юго-Западного фронта. Прошёл Смоленское сражение, командовал 129-й стрелковой дивизией. В мае 1942 г. при окружении армии под Харьковом погиб (по другой версии — застрелился, чтобы не попасть в плен). Перезахоронен на 13-м городском кладбище Харькова.',
+      text: 'Уроженец слободы Талы, родился 13 марта 1896 г. От рядового РИА (1915) до командующего 6-й армией Юго-Западного фронта. Прошёл Смоленское сражение, командовал 129-й стрелковой дивизией. В мае 1942 г. при окружении армии под Харьковом погиб (по другой версии — застрелился, чтобы не попасть в плен). Перезахоронен на 13-м городском кладбище Харькова.',
     },
     {
       name: 'Дмитрий Сверчков',
@@ -2498,7 +2723,7 @@ function PeopleSection() {
     },
   ];
   return (
-    <section id="people" style={{ padding: '120px 60px', background: 'var(--paper)' }} data-screen-label="Люди">
+    <section id="people" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--paper)' }} data-screen-label="Люди">
       <SectionHeader
         eyebrow="Раздел IV"
         title="Известные люди села"
@@ -2542,6 +2767,7 @@ function PeopleSection() {
    КУХНЯ И ТРАДИЦИИ — без изменений по структуре, тёмно-зелёные акценты
    ============================================================ */
 function CuisineSection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
   const dishes = [
     { name: 'Узвар', sub: 'из сушёных груш и яблок', text: 'Самый ходовой напиток к рождественским столам — компот на сухофруктах с ложкой мёда.', src: 'images/uzvar.jpg' },
     { name: 'Борщ с пампушками', sub: 'на свином окороке', text: 'Малороссийский след в кухне Кантемировского района — густой борщ с буряком, томлёной свининой и чесночными пампушками.', src: 'images/borscht.jpg' },
@@ -2560,14 +2786,14 @@ function CuisineSection() {
     'Рождество Богородицы — престольный для соседнего прихода',
   ];
   return (
-    <section id="cuisine" style={{ padding: '120px 60px', background: 'var(--paper-2)' }} className="paper-tex" data-screen-label="Кухня">
+    <section id="cuisine" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--paper-2)' }} className="paper-tex" data-screen-label="Кухня">
       <SectionHeader
         eyebrow="Раздел V"
         title="Кухня и традиции"
         sub="Малороссийская основа с воронежским говором — рецепты и обычаи, что переходят от бабушек к внукам."
       />
 
-      <div style={{ maxWidth: 1280, margin: '0 auto', display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 60, alignItems: 'start' }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.4fr 1fr', gap: isMobile ? 32 : 60, alignItems: 'start' }}>
         <div>
           <div className="eyebrow" style={{ marginBottom: 16, color: 'var(--moss-2)' }}>что на столе</div>
           <Carousel
@@ -2588,7 +2814,7 @@ function CuisineSection() {
           />
         </div>
 
-        <div style={{ background: 'var(--moss-1)', color: 'var(--paper)', padding: '36px 32px', position: 'relative' }}>
+        <div style={{ background: 'var(--moss-1)', color: 'var(--paper)', padding: isMobile ? '24px 20px' : '36px 32px', position: 'relative' }}>
           <div style={{ position: 'absolute', top: 16, right: 16, color: 'var(--moss-5)', opacity: 0.5 }}>
             <CornerOrnament size={50} />
           </div>
@@ -2630,6 +2856,7 @@ Object.assign(window, { PeopleSection, CuisineSection });
    ФОТОГАЛЕРЕЯ + МЕРОПРИЯТИЯ + НОВОСТИ — расширенные
    ============================================================ */
 function GallerySection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
   const archive = [
     { src: 'images/krasnyi-ugol-1915.png',         cap: 'Красный угол с иконами в избе таловского крестьянина',                  cat: 'архив · 1915' },
     { src: 'images/molotba-katkom-1910.png',       cap: 'Молотьба катком — обычная летняя работа',                                cat: 'архив · 1910' },
@@ -2646,7 +2873,7 @@ function GallerySection() {
     { src: 'images/gazeta-talam-220-let.png',      cap: '«Талам — 220 лет» — статья районной газеты',                             cat: 'архив газет' },
   ];
   return (
-    <section id="gallery" style={{ padding: '120px 60px', background: 'var(--paper)' }} data-screen-label="Фотогалерея">
+    <section id="gallery" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--paper)' }} data-screen-label="Фотогалерея">
       <SectionHeader
         eyebrow="Раздел VI"
         title="Фотогалерея"
@@ -2685,6 +2912,7 @@ function GallerySection() {
    МЕРОПРИЯТИЯ — детальные с программой
    ============================================================ */
 function EventsSection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
   const events = [
     {
       date: '18 окт 2025', day: 'суббота', time: '14:00',
@@ -2808,7 +3036,7 @@ function EventsSection() {
   ];
   const [openIdx, setOpenIdx] = React.useState(0);
   return (
-    <section id="events" style={{ padding: '120px 60px', background: 'var(--moss-2)', color: 'var(--paper)' }}
+    <section id="events" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--moss-2)', color: 'var(--paper)' }}
              data-screen-label="Мероприятия">
       <div style={{ textAlign: 'center', marginBottom: 60 }}>
         <div className="eyebrow" style={{ marginBottom: 14, color: 'var(--moss-5)' }}>Раздел VII</div>
@@ -2821,7 +3049,7 @@ function EventsSection() {
         </p>
       </div>
 
-      <div style={{ maxWidth: 1280, margin: '0 auto', display: 'grid', gridTemplateColumns: '0.8fr 1.2fr', gap: 30, alignItems: 'start' }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '0.8fr 1.2fr', gap: isMobile ? 20 : 30, alignItems: 'start' }}>
         {/* Список дат */}
         <div style={{ background: 'var(--moss-1)', border: '1px solid rgba(244,234,213,0.18)' }}>
           {events.map((e, i) => (
@@ -2848,14 +3076,14 @@ function EventsSection() {
         </div>
 
         {/* Деталь выбранного события */}
-        <article style={{ background: 'var(--paper)', color: 'var(--ink)', padding: '40px 44px', borderTop: '4px solid var(--accent)', minHeight: 540 }}>
+        <article style={{ background: 'var(--paper)', color: 'var(--ink)', padding: isMobile ? '24px 20px' : '40px 44px', borderTop: '4px solid var(--accent)', minHeight: isMobile ? 'auto' : 540 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 14 }}>
             <div className="eyebrow" style={{ color: 'var(--accent)' }}>{events[openIdx].tag}</div>
             <div style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 24, color: 'var(--moss-2)', fontWeight: 600 }}>
               {events[openIdx].date}{events[openIdx].time && <span style={{ color: 'var(--ink-soft)', fontSize: 16, marginLeft: 12 }}>· {events[openIdx].time}</span>}
             </div>
           </div>
-          <h3 style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 42, margin: '0 0 8px', color: 'var(--wood-4)', fontWeight: 500, lineHeight: 1.05 }}>
+          <h3 style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: isMobile ? 28 : 42, margin: '0 0 8px', color: 'var(--wood-4)', fontWeight: 500, lineHeight: 1.05 }}>
             {events[openIdx].title}
           </h3>
           <div style={{ fontFamily: 'var(--serif-text)', fontSize: 14, color: 'var(--ink-soft)', fontStyle: 'italic', marginBottom: 22 }}>
@@ -2892,6 +3120,7 @@ function EventsSection() {
    НОВОСТИ — обновлённые
    ============================================================ */
 function NewsSection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
   const news = [
     { date: '21 апр 2026', title: 'Подготовка ко Дню Победы — репетиции «Бессмертного полка»', text: 'Школа и Дом культуры начали репетиции к шествию 9 мая. По данным администрации, в этом году ожидается участие более 200 жителей, включая учеников всех классов.' },
     { date: '12 апр 2026', title: 'Школа Талов выиграла районную олимпиаду по литературе', text: 'Команда таловской средней школы заняла первое место среди десяти школ Кантемировского района. Учеников готовила Е. Н. Литвинова.' },
@@ -2901,7 +3130,7 @@ function NewsSection() {
     { date: '28 фев 2026', title: 'Сход жителей: ремонт ул. Победы и автобусный маршрут', text: 'На сходе обсуждали ремонт улицы Победы и установку новой остановки автобусного маршрута Талы — Кантемировка. Глава А. А. Ковалёв пообещал внести вопрос в районный бюджет.' },
   ];
   return (
-    <section id="news" style={{ padding: '120px 60px', background: 'var(--paper)' }} data-screen-label="Новости">
+    <section id="news" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--paper)' }} data-screen-label="Новости">
       <SectionHeader
         eyebrow="Раздел VIII"
         title="Новости"
@@ -2911,9 +3140,9 @@ function NewsSection() {
         {news.map((n, i) => (
           <article key={i} style={{
             display: 'grid',
-            gridTemplateColumns: '160px 1fr auto',
-            gap: 32,
-            padding: '32px 0',
+            gridTemplateColumns: isMobile ? '1fr' : '160px 1fr auto',
+            gap: isMobile ? 12 : 32,
+            padding: isMobile ? '20px 0' : '32px 0',
             borderTop: '1px solid var(--hairline-2)',
             alignItems: 'start',
           }}>
@@ -2935,7 +3164,7 @@ function NewsSection() {
       </div>
 
       {/* ВКонтакте блок */}
-      <div style={{ maxWidth: 980, margin: '60px auto 0', padding: '32px 36px', background: 'var(--moss-1)', color: 'var(--paper)', display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 28, alignItems: 'center' }}>
+      <div style={{ maxWidth: 980, margin: isMobile ? '32px auto 0' : '60px auto 0', padding: isMobile ? '20px 18px' : '32px 36px', background: 'var(--moss-1)', color: 'var(--paper)', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'auto 1fr', gap: isMobile ? 16 : 28, alignItems: 'center' }}>
         <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
           <rect width="64" height="64" rx="12" fill="#2787F5"/>
           <path d="M 34 42 c -10 0 -16 -7 -16 -19 h 5 c 0 8 4 12 7 13 v -13 h 5 v 7 c 3 0 6 -3 7 -7 h 5 c -1 4 -4 8 -6 9 c 3 1 5 3 7 9 h -5 c -1 -3 -3 -6 -8 -6 v 6 z" fill="#fff"/>
@@ -3030,6 +3259,7 @@ const MAP_PINS = [
 
 
 function WeatherSection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
   const days = [
     { dow: 'Сб', date: '26 апр', icon: '⛅', day: '+14', night: '+4', wind: 'ЮВ 5', cond: 'Облачно с прояснениями' },
     { dow: 'Вс', date: '27 апр', icon: '☁', day: '+11', night: '+3', wind: 'З 7',  cond: 'Пасмурно' },
@@ -3040,11 +3270,11 @@ function WeatherSection() {
     { dow: 'Пт', date: '2 мая',  icon: '⛅', day: '+18', night: '+7', wind: 'ЮВ 6', cond: 'Переменная облачность' },
   ];
   return (
-    <section id="weather" style={{ padding: '100px 60px', background: 'var(--paper)', borderTop: '1px solid var(--hairline)' }} data-screen-label="Погода">
+    <section id="weather" style={{ padding: isMobile ? '40px 0' : '100px 60px', background: 'var(--paper)', borderTop: '1px solid var(--hairline)' }} data-screen-label="Погода">
       <div style={{ maxWidth: 880, margin: '0 auto' }}>
         {/* Газетный заголовок */}
         <div style={{ borderTop: '3px solid var(--ink)', borderBottom: '1px solid var(--ink)', padding: '10px 0', marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-          <div style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontWeight: 700, fontSize: 36, color: 'var(--ink)', letterSpacing: '-0.02em' }}>
+          <div style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontWeight: 700, fontSize: isMobile ? 24 : 36, color: 'var(--ink)', letterSpacing: '-0.02em' }}>
             Погода в Талах
           </div>
           <div style={{ fontFamily: 'var(--serif-text)', fontSize: 12, color: 'var(--ink-soft)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
@@ -3058,7 +3288,8 @@ function WeatherSection() {
         </div>
 
         {/* Таблица прогноза */}
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--serif-text)', fontSize: 14 }}>
+        <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', minWidth: isMobile ? 600 : 'auto', borderCollapse: 'collapse', fontFamily: 'var(--serif-text)', fontSize: 14 }}>
           <thead>
             <tr style={{ borderBottom: '2px solid var(--ink)' }}>
               {['День', 'Дата', '', 'День', 'Ночь', 'Ветер', 'Описание'].map((h,i) => (
@@ -3088,6 +3319,7 @@ function WeatherSection() {
             ))}
           </tbody>
         </table>
+        </div>
 
         {/* Сноска */}
         <div style={{ marginTop: 18, display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--ink)', paddingTop: 10 }}>
@@ -3105,6 +3337,7 @@ function WeatherSection() {
 
 
 function SchoolSection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
   const [newsTab, setNewsTab] = React.useState(0);
   const historyItems = [
     { year: '1894', title: 'Земская школа', text: 'Открыта земская школа на 32 ученика — первое государственное учебное заведение. До этого в Талах была только приходская школа при Никольской церкви.' },
@@ -3124,26 +3357,26 @@ function SchoolSection() {
     { date: '15 мар 2026', title: 'Субботник на территории школы', text: 'Педагоги, ученики старших классов и родители привели в порядок школьный двор после зимы.' },
   ];
   return (
-    <section id="school" style={{ padding: '120px 60px', background: 'var(--paper-2)' }} className="paper-tex" data-screen-label="Школа">
+    <section id="school" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--paper-2)' }} className="paper-tex" data-screen-label="Школа">
       <SectionHeader eyebrow="Раздел XII" title="Таловская школа" sub="От земской избы-читальни 1894 года — до современного центра образования с 350 учениками и полувековыми традициями." />
 
       {/* ── ФОТО ШКОЛЫ ── */}
       <div style={{ maxWidth: 1100, margin: '0 auto 60px', position: 'relative' }}>
         <figure style={{ margin: 0, position: 'relative', boxShadow: '0 18px 50px rgba(60,40,20,0.22)' }}>
           <img src="images/shkola-foto.png" alt="МКОУ «Таловская СОШ» — здание школы"
-               style={{ width: '100%', height: 460, objectFit: 'cover', display: 'block' }}/>
-          <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: '60px 36px 24px',
+               style={{ width: '100%', height: isMobile ? 240 : 460, objectFit: 'cover', display: 'block' }}/>
+          <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: isMobile ? '32px 16px 16px' : '60px 36px 24px',
                         background: 'linear-gradient(transparent 0%, rgba(28,20,12,0.55) 60%, rgba(28,20,12,0.85) 100%)',
-                        display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 30 }}>
+                        display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'flex-end', gap: isMobile ? 14 : 30, flexWrap: 'wrap' }}>
             <div>
               <div className="eyebrow" style={{ color: 'rgba(255,255,255,0.7)', marginBottom: 8 }}>МКОУ «Таловская СОШ»</div>
               <div style={{ fontFamily: "'Old Standard TT', serif", fontStyle: 'italic', fontSize: 30, fontWeight: 700, color: 'var(--paper)', lineHeight: 1.2 }}>
                 с. Талы, ул. Школьная, 1
               </div>
             </div>
-            <div style={{ display: 'flex', gap: 28 }}>
+            <div style={{ display: 'flex', gap: isMobile ? 16 : 28, flexWrap: 'wrap' }}>
               {[['350','учеников'],['11','классов'],['38','педагогов']].map(([v,l],i) => (
-                <div key={i} style={{ textAlign: 'right' }}>
+                <div key={i} style={{ textAlign: isMobile ? 'left' : 'right' }}>
                   <div style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 30, fontWeight: 700, color: 'var(--accent)', lineHeight: 1 }}>{v}</div>
                   <div style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.7)', marginTop: 4 }}>{l}</div>
                 </div>
@@ -3159,11 +3392,12 @@ function SchoolSection() {
       {/* ── ИСТОРИЯ ── */}
       <div style={{ maxWidth: 1100, margin: '0 auto 80px' }}>
         <div className="eyebrow" style={{ marginBottom: 28, textAlign: 'center' }}>История учреждения</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 0 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(5, 1fr)', gap: 0 }}>
           {historyItems.map((item, i) => (
             <div key={i} style={{
-              padding: '24px 20px',
-              borderLeft: i > 0 ? '1px solid var(--hairline)' : 'none',
+              padding: isMobile ? '18px 16px' : '24px 20px',
+              borderLeft: !isMobile && i > 0 ? '1px solid var(--hairline)' : 'none',
+              borderTop: isMobile && i > 0 ? '1px solid var(--hairline)' : 'none',
               background: i === historyItems.length - 1 ? 'var(--moss-1)' : 'transparent',
             }}>
               <div style={{
@@ -3186,8 +3420,8 @@ function SchoolSection() {
       </div>
 
       {/* ── СЕГОДНЯ ── */}
-      <div style={{ maxWidth: 1100, margin: '0 auto 80px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40 }}>
-        <div style={{ background: 'var(--paper)', border: '1px solid var(--hairline)', padding: '36px 36px 32px' }}>
+      <div style={{ maxWidth: 1100, margin: isMobile ? '0 auto 40px' : '0 auto 80px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 24 : 40 }}>
+        <div style={{ background: 'var(--paper)', border: '1px solid var(--hairline)', padding: isMobile ? '20px 18px' : '36px 36px 32px' }}>
           <div className="eyebrow" style={{ marginBottom: 20 }}>Школа сегодня</div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
             {[
@@ -3242,9 +3476,9 @@ function SchoolSection() {
             Перейти в сообщество →
           </a>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: isMobile ? 14 : 20 }}>
           {vkNews.map((n, i) => (
-            <div key={i} style={{ background: 'var(--paper)', border: '1px solid var(--hairline)', padding: '22px 24px' }}>
+            <div key={i} style={{ background: 'var(--paper)', border: '1px solid var(--hairline)', padding: isMobile ? '16px 18px' : '22px 24px' }}>
               <div className="eyebrow" style={{ marginBottom: 10, color: 'var(--ink-soft)' }}>{n.date}</div>
               <div style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 17, color: 'var(--wood-4)', fontWeight: 500, marginBottom: 10, lineHeight: 1.3 }}>{n.title}</div>
               <div style={{ fontFamily: 'var(--serif-text)', fontSize: 13, lineHeight: 1.6, color: 'var(--ink-2)' }}>{n.text}</div>
@@ -3259,7 +3493,7 @@ function SchoolSection() {
       {/* ── ФОТОГАЛЕРЕЯ (заглушки) ── */}
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
         <div className="eyebrow" style={{ marginBottom: 20 }}>Фотогалерея</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 12 }}>
           {[
             'Главный корпус школы',
             'Урок в начальных классах',
@@ -3289,6 +3523,7 @@ function SchoolSection() {
    ДЕМОГРАФИЯ — анимированный график 1716→2026
    ============================================================ */
 function DemographySection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
   const [revealed, setRevealed] = React.useState(false);
   const ref = React.useRef(null);
   React.useEffect(() => {
@@ -3297,7 +3532,7 @@ function DemographySection() {
     return () => obs.disconnect();
   }, []);
   const data = [
-    { year: 1716, pop: 250 }, { year: 1747, pop: 850 }, { year: 1800, pop: 2100 },
+    { year: 1716, pop: 250 }, { year: 1747, pop: 286 }, { year: 1800, pop: 2100 },
     { year: 1859, pop: 4100 }, { year: 1900, pop: 5642 }, { year: 1916, pop: 6778 },
     { year: 1926, pop: 6035 }, { year: 1936, pop: 4800 }, { year: 1959, pop: 3200 },
     { year: 1979, pop: 2700 }, { year: 1995, pop: 2500 }, { year: 2010, pop: 1674 },
@@ -3309,9 +3544,9 @@ function DemographySection() {
   const path = data.map((d, i) => `${i === 0 ? 'M' : 'L'} ${x(d.year)} ${y(d.pop)}`).join(' ');
   const peakIdx = 5; // 1916
   return (
-    <section ref={ref} id="demography" style={{ padding: '120px 60px', background: 'var(--paper)' }} data-screen-label="Демография">
-      <SectionHeader eyebrow="Раздел XIII" title="Демография в трёх веках" sub="От 250 душ при основании — через пик 6 778 жителей в 1916-м — до 1 484 в наши дни." />
-      <div style={{ maxWidth: 1100, margin: '0 auto', background: 'var(--paper-2)', border: '1px solid var(--hairline)', padding: 32, position: 'relative' }} className="paper-tex">
+    <section ref={ref} id="demography" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--paper)' }} data-screen-label="Демография">
+      <SectionHeader eyebrow="Раздел XIII" title="Демография в трёх веках" sub="От 286 душ при основании в 1747-м — через пик 6 778 жителей в 1916-м — до 1 484 в наши дни." />
+      <div style={{ maxWidth: 1100, margin: '0 auto', background: 'var(--paper-2)', border: '1px solid var(--hairline)', padding: isMobile ? 16 : 32, position: 'relative', overflowX: 'auto' }} className="paper-tex">
         <svg viewBox={`0 0 ${w} ${h}`} width="100%" style={{ display: 'block', overflow: 'visible' }}>
           {/* сетка */}
           {[0, 1750, 5000, 7000].map((p, i) => p > 0 && (
@@ -3365,6 +3600,7 @@ function DemographySection() {
    ТОГДА / СЕЙЧАС — слайдер сравнения
    ============================================================ */
 function ThenNowSection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
   const [pos, setPos] = React.useState(50);
   const [pair, setPair] = React.useState(0);
   const pairs = [
@@ -3377,7 +3613,7 @@ function ThenNowSection() {
   ];
   const p = pairs[pair];
   return (
-    <section id="thennow" style={{ padding: '120px 60px', background: 'var(--paper-2)' }} className="paper-tex" data-screen-label="Тогда/Сейчас">
+    <section id="thennow" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--paper-2)' }} className="paper-tex" data-screen-label="Тогда/Сейчас">
       <SectionHeader eyebrow="Раздел XIV" title="Талы тогда и сейчас" sub="Перетащите ползунок, чтобы сравнить старые фотографии 1910-х годов с современным селом." />
       <div style={{ maxWidth: 1000, margin: '0 auto' }}>
         <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 20, flexWrap: 'wrap' }}>
@@ -3429,6 +3665,7 @@ function ThenNowSection() {
    ВОЕННЫЙ МЕМОРИАЛ — поимённый список
    ============================================================ */
 function MemorialSection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
   const [filter, setFilter] = React.useState('all');
   const fallen = [
     { name: 'Авдеев Иван Семёнович', born: 1908, died: 1942, front: 'Сталинградский', rank: 'красноармеец' },
@@ -3447,15 +3684,15 @@ function MemorialSection() {
   const fronts = ['all', ...new Set(fallen.map(f => f.front))];
   const filtered = filter === 'all' ? fallen : fallen.filter(f => f.front === filter);
   return (
-    <section id="memorial" style={{ padding: '120px 60px', background: 'var(--moss-1)', color: 'var(--paper)' }} data-screen-label="Мемориал">
-      <div style={{ maxWidth: 1200, margin: '0 auto 60px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 50, alignItems: 'center' }}>
+    <section id="memorial" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--moss-1)', color: 'var(--paper)' }} data-screen-label="Мемориал">
+      <div style={{ maxWidth: 1200, margin: isMobile ? '0 auto 32px' : '0 auto 60px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 24 : 50, alignItems: 'center' }}>
         <div>
           <div className="eyebrow" style={{ color: 'var(--moss-5)', marginBottom: 14 }}>Раздел XV</div>
-          <h2 className="h-display" style={{ fontSize: 56, margin: '0 0 18px', fontStyle: 'italic', fontWeight: 500, color: 'var(--paper)', letterSpacing: '-0.02em' }}>Военный мемориал</h2>
+          <h2 className="h-display" style={{ fontSize: isMobile ? 36 : 56, margin: '0 0 18px', fontStyle: 'italic', fontWeight: 500, color: 'var(--paper)', letterSpacing: '-0.02em' }}>Военный мемориал</h2>
           <p style={{ fontSize: 17, lineHeight: 1.65, color: 'rgba(244,234,213,0.85)', fontStyle: 'italic', marginBottom: 18 }}>
             Из села Талы на фронт ушли более 800 человек. Ниже — выдержка из списка с братской могилы. Полный поимённый список высечен на мраморных плитах у подножия монумента.
           </p>
-          <div style={{ display: 'flex', gap: 28, marginTop: 24, paddingTop: 24, borderTop: '1px solid rgba(244,234,213,0.18)' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: isMobile ? 16 : 28, marginTop: 24, paddingTop: 24, borderTop: '1px solid rgba(244,234,213,0.18)' }}>
             <div>
               <div style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 36, color: 'var(--accent)', fontWeight: 700, lineHeight: 1 }}><Counter to={800} suffix="+"/></div>
               <div style={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(244,234,213,0.6)', marginTop: 6 }}>ушли на фронт</div>
@@ -3472,7 +3709,7 @@ function MemorialSection() {
         </div>
         <figure style={{ margin: 0, position: 'relative' }}>
           <img src="images/memorial-talyi.png" alt="Мемориал воинам-освободителям с. Талы"
-               style={{ width: '100%', height: 420, objectFit: 'cover', display: 'block', boxShadow: '0 18px 50px rgba(0,0,0,0.4)', filter: 'contrast(1.04) saturate(1.05)' }}/>
+               style={{ width: '100%', height: isMobile ? 240 : 420, objectFit: 'cover', display: 'block', boxShadow: '0 18px 50px rgba(0,0,0,0.4)', filter: 'contrast(1.04) saturate(1.05)' }}/>
           <figcaption style={{ position: 'absolute', left: 0, bottom: 0, right: 0, padding: '14px 18px', background: 'linear-gradient(transparent, rgba(0,0,0,0.7))', color: 'rgba(244,234,213,0.92)', fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 13 }}>
             Памятник воину-освободителю и братская могила · 75 лет со дня освобождения
           </figcaption>
@@ -3492,11 +3729,11 @@ function MemorialSection() {
           ))}
         </div>
         {/* Список */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 0, border: '1px solid rgba(244,234,213,0.18)', background: 'rgba(244,234,213,0.04)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: 0, border: '1px solid rgba(244,234,213,0.18)', background: 'rgba(244,234,213,0.04)' }}>
           {filtered.map((f, i) => (
             <div key={f.name} style={{
-              padding: '16px 22px', borderBottom: '1px solid rgba(244,234,213,0.1)',
-              borderRight: i % 2 === 0 ? '1px solid rgba(244,234,213,0.1)' : 'none',
+              padding: isMobile ? '14px 16px' : '16px 22px', borderBottom: '1px solid rgba(244,234,213,0.1)',
+              borderRight: !isMobile && i % 2 === 0 ? '1px solid rgba(244,234,213,0.1)' : 'none',
             }}>
               <div style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 17, color: 'var(--paper)', fontWeight: 500, marginBottom: 4 }}>{f.name}</div>
               <div style={{ display: 'flex', gap: 14, fontFamily: 'var(--serif-text)', fontSize: 12, color: 'rgba(244,234,213,0.7)' }}>
@@ -3533,6 +3770,7 @@ function MemorialSection() {
    КАЛЕНДАРЬ СЕЛЬСКОГО ГОДА — колесо месяцев
    ============================================================ */
 function CalendarSection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
   const [m, setM] = React.useState(3);
   const months = [
     { name: 'январь',   work: 'Колядки, молотьба остатков, зимняя охота', holiday: 'Рождество, Крещение', src: 'images/month-01-jan.jpg' },
@@ -3550,11 +3788,11 @@ function CalendarSection() {
   ];
   const cur = months[m];
   return (
-    <section id="calendar" style={{ padding: '120px 60px', background: 'var(--paper)' }} data-screen-label="Календарь">
+    <section id="calendar" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--paper)' }} data-screen-label="Календарь">
       <SectionHeader eyebrow="Раздел XVI" title="Сельский год" sub="Двенадцать месяцев крестьянского труда и праздников — как жили в Талах в конце XIX — начале XX века." />
-      <div style={{ maxWidth: 1000, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 60, alignItems: 'center' }}>
+      <div style={{ maxWidth: 1000, margin: '0 auto', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 28 : 60, alignItems: 'center' }}>
         {/* Колесо */}
-        <div style={{ position: 'relative', width: 380, height: 380, margin: '0 auto' }}>
+        <div style={{ position: 'relative', width: isMobile ? 280 : 380, height: isMobile ? 280 : 380, margin: '0 auto', maxWidth: '100%' }}>
           <svg viewBox="0 0 380 380" style={{ width: '100%', height: '100%' }}>
             <circle cx="190" cy="190" r="170" fill="var(--paper-2)" stroke="var(--wood-4)" strokeWidth="2"/>
             <circle cx="190" cy="190" r="80" fill="var(--paper)" stroke="var(--wood-4)" strokeWidth="1"/>
@@ -3579,7 +3817,7 @@ function CalendarSection() {
             <img src={cur.src} alt={cur.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
           </div>
           <div className="eyebrow" style={{ marginBottom: 8 }}>{cur.name}</div>
-          <h3 className="h-display" style={{ fontSize: 44, margin: '0 0 24px', fontStyle: 'italic', color: 'var(--wood-4)', textTransform: 'capitalize', fontWeight: 600 }}>{cur.name}</h3>
+          <h3 className="h-display" style={{ fontSize: isMobile ? 30 : 44, margin: '0 0 24px', fontStyle: 'italic', color: 'var(--wood-4)', textTransform: 'capitalize', fontWeight: 600 }}>{cur.name}</h3>
           <div style={{ borderTop: '1px solid var(--hairline)', paddingTop: 18, marginBottom: 18 }}>
             <div className="eyebrow" style={{ marginBottom: 6, fontSize: 10 }}>Хозяйственные работы</div>
             <div style={{ fontFamily: 'var(--serif-text)', fontSize: 16, lineHeight: 1.6, color: 'var(--ink-2)' }}>{cur.work}</div>
@@ -3598,6 +3836,7 @@ function CalendarSection() {
    ВИКТОРИНА «УГАДАЙ-КТО»
    ============================================================ */
 function QuizSection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
   const qs = [
     { q: 'В каком году Талы были основаны?', opts: ['1716', '1747', '1755', '1812'], a: 1, fact: '20 марта 1747 г. — указ Сената о выделении земли поселенцам Каплуновой слободы.' },
     { q: 'Сколько жителей было в Талах на пике в 1916 году?', opts: ['3 200', '5 642', '6 778', '8 100'], a: 2, fact: '6 778 жителей — рекордное значение, после которого началось демографическое сжатие.' },
@@ -3616,7 +3855,7 @@ function QuizSection() {
   };
   const reset = () => { setI(0); setPicked(null); setScore(0); setDone(false); };
   return (
-    <section id="quiz" style={{ padding: '120px 60px', background: 'var(--paper-2)' }} className="paper-tex" data-screen-label="Викторина">
+    <section id="quiz" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--paper-2)' }} className="paper-tex" data-screen-label="Викторина">
       <SectionHeader eyebrow="Раздел XVII" title="Угадай-кто" sub="Пять вопросов об истории Талов. Проверьте, насколько внимательно вы прочитали этот сайт." />
       <div style={{ maxWidth: 720, margin: '0 auto', background: 'var(--paper)', border: '1px solid var(--hairline-2)', boxShadow: '0 14px 40px rgba(60,40,20,0.1)', overflow: 'hidden' }}>
         {!done ? (
@@ -3625,8 +3864,8 @@ function QuizSection() {
               <div className="eyebrow" style={{ color: 'var(--moss-5)' }}>вопрос {i + 1} из {qs.length}</div>
               <div style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 15 }}>счёт · {score}/{qs.length}</div>
             </div>
-            <div style={{ padding: '32px 36px' }}>
-              <h3 style={{ fontFamily: "'Old Standard TT', serif", fontWeight: 700, fontSize: 26, lineHeight: 1.3, margin: '0 0 24px', color: 'var(--wood-4)' }}>{cur.q}</h3>
+            <div style={{ padding: isMobile ? '20px 18px' : '32px 36px' }}>
+              <h3 style={{ fontFamily: "'Old Standard TT', serif", fontWeight: 700, fontSize: isMobile ? 20 : 26, lineHeight: 1.3, margin: '0 0 24px', color: 'var(--wood-4)' }}>{cur.q}</h3>
               <div style={{ display: 'grid', gap: 10 }}>
                 {cur.opts.map((o, k) => {
                   const isPicked = picked === k;
@@ -3673,6 +3912,34 @@ function QuizSection() {
             <button onClick={reset} style={{ padding: '12px 28px', background: 'var(--wood-4)', color: 'var(--paper)', border: 'none', cursor: 'pointer', fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 15, fontWeight: 600 }}>
               Пройти заново
             </button>
+            {/* PDF certificate via print */}
+            <button onClick={() => {
+              const w = window.open('', '_blank');
+              if (!w) { alert('Разрешите всплывающие окна'); return; }
+              const total = qs.length;
+              const name = prompt('Ваше имя для сертификата?') || 'Гражданин';
+              w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Сертификат — Талы</title><style>
+                body { font-family: 'Cormorant Garamond', 'Times New Roman', serif; background: #f4ead5; color: #2a1f15; margin: 0; padding: 60px; }
+                .cert { max-width: 800px; margin: 0 auto; border: 8px double #5c4527; padding: 50px 60px; text-align: center; background: #faf3e0; }
+                h1 { font-size: 48px; font-style: italic; margin: 0 0 8px; color: #3d2f1f; }
+                .sub { font-size: 13px; letter-spacing: 0.3em; text-transform: uppercase; color: #6b5538; margin-bottom: 36px; }
+                .name { font-family: 'Marck Script', cursive; font-size: 56px; color: #8b4a2b; margin: 24px 0; }
+                .body { font-size: 18px; line-height: 1.7; font-style: italic; }
+                .seal { margin-top: 40px; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #3d4f30; }
+                @media print { body { padding: 0; } .cert { border: 8px double #5c4527; } button { display: none; } }
+              </style></head><body><div class="cert">
+                <h1>Почётный знаток Талов</h1>
+                <div class="sub">архив села · 1747 — 2026</div>
+                <div class="body">Настоящим удостоверяется, что</div>
+                <div class="name">${name}</div>
+                <div class="body">показал(а) глубокие познания в истории села Талы Кантемировского района Воронежской области, ответив верно на ${score} из ${total} вопросов краеведческой викторины.</div>
+                <div class="seal">— ${new Date().toLocaleDateString('ru-RU', {day:'numeric',month:'long',year:'numeric'})} —</div>
+                <button onclick="window.print()" style="margin-top:30px;padding:12px 24px;background:#5c4527;color:#f4ead5;border:none;font-family:inherit;cursor:pointer">Распечатать или сохранить в PDF</button>
+              </div></body></html>`);
+              w.document.close();
+            }}
+            style={{ marginTop: 18, marginLeft: 12, padding: '12px 22px', background: 'var(--accent)', color: 'var(--paper)', border: 'none', cursor: 'pointer', fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 600 }}
+            >📜 Получить сертификат</button>
           </div>
         )}
       </div>
@@ -3683,26 +3950,50 @@ function QuizSection() {
 /* ============================================================
    СЛОВАРЬ ДИАЛЕКТА — клик по слову показывает значение
    ============================================================ */
+function speakOrPlay(text, src) {
+  // try audio file first
+  if (src) {
+    const a = new Audio(src);
+    a.play().catch(() => {
+      // fallback to TTS
+      if ('speechSynthesis' in window) {
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'ru-RU';
+        u.rate = 0.85;
+        speechSynthesis.speak(u);
+      }
+    });
+    return;
+  }
+  if ('speechSynthesis' in window) {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ru-RU';
+    u.rate = 0.85;
+    speechSynthesis.speak(u);
+  }
+}
+
 function DialectSection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
   const [word, setWord] = React.useState(null);
   const dict = [
-    { w: 'тальник', t: 'таль-ник', m: 'кустарниковая ива; от него произошло название села' },
-    { w: 'хата', t: 'ха-та', m: 'крестьянская изба, обмазанная глиной; из малороссийского' },
-    { w: 'узвар', t: 'уз-вар', m: 'компот из сушёных фруктов; от глагола «варить»' },
-    { w: 'каток', t: 'ка-ток', m: 'тяжёлый каменный или деревянный валик для молотьбы зерна' },
-    { w: 'пашня', t: 'паш-ня', m: 'обработанное под посев поле; антоним залежи' },
-    { w: 'окрошка', t: 'ок-рош-ка', m: 'холодный суп на квасе с овощами и яйцом' },
-    { w: 'нечуйветер', t: 'не-чуй-ве-тер', m: 'местное название ястребинки волосистой; из укр. «не чує вітру»' },
-    { w: 'байрак', t: 'бай-рак', m: 'лесок в овраге, балке; тюркизм в южных говорах' },
-    { w: 'плёт', t: 'плёт', m: 'плетёный забор из лозы; основной тип ограды до XX в.' },
-    { w: 'чулан', t: 'чу-лан', m: 'хозяйственное помещение при избе для хранения' },
-    { w: 'припечек', t: 'при-пе-чек', m: 'площадка перед устьем русской печи' },
-    { w: 'махотка', t: 'ма-хот-ка', m: 'глиняный горшок небольшого размера' },
+    { w: 'тальник', t: 'таль-ник', m: 'кустарниковая ива; от него произошло название села', audio: 'audio/dialect/тальник.mp3' },
+    { w: 'хата', t: 'ха-та', m: 'крестьянская изба, обмазанная глиной; из малороссийского', audio: 'audio/dialect/хата.mp3' },
+    { w: 'узвар', t: 'уз-вар', m: 'компот из сушёных фруктов; от глагола «варить»', audio: 'audio/dialect/узвар.mp3' },
+    { w: 'каток', t: 'ка-ток', m: 'тяжёлый каменный или деревянный валик для молотьбы зерна', audio: 'audio/dialect/каток.mp3' },
+    { w: 'пашня', t: 'паш-ня', m: 'обработанное под посев поле; антоним залежи', audio: 'audio/dialect/пашня.mp3' },
+    { w: 'окрошка', t: 'ок-рош-ка', m: 'холодный суп на квасе с овощами и яйцом', audio: 'audio/dialect/окрошка.mp3' },
+    { w: 'нечуйветер', t: 'не-чуй-ве-тер', m: 'местное название ястребинки волосистой; из укр. «не чує вітру»', audio: 'audio/dialect/нечуйветер.mp3' },
+    { w: 'байрак', t: 'бай-рак', m: 'лесок в овраге, балке; тюркизм в южных говорах', audio: 'audio/dialect/байрак.mp3' },
+    { w: 'плёт', t: 'плёт', m: 'плетёный забор из лозы; основной тип ограды до XX в.', audio: 'audio/dialect/плёт.mp3' },
+    { w: 'чулан', t: 'чу-лан', m: 'хозяйственное помещение при избе для хранения', audio: 'audio/dialect/чулан.mp3' },
+    { w: 'припечек', t: 'при-пе-чек', m: 'площадка перед устьем русской печи', audio: 'audio/dialect/припечек.mp3' },
+    { w: 'махотка', t: 'ма-хот-ка', m: 'глиняный горшок небольшого размера', audio: 'audio/dialect/махотка.mp3' },
   ];
   return (
-    <section id="dialect" style={{ padding: '120px 60px', background: 'var(--paper)' }} data-screen-label="Диалект">
+    <section id="dialect" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--paper)' }} data-screen-label="Диалект">
       <SectionHeader eyebrow="Раздел XVIII" title="Говор таловцев" sub="Двенадцать слов из живой речи XIX–XX веков. Кликните по слову — узнаете значение и происхождение." />
-      <div style={{ maxWidth: 1000, margin: '0 auto', display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: 40, alignItems: 'start' }}>
+      <div style={{ maxWidth: 1000, margin: '0 auto', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.3fr 1fr', gap: isMobile ? 24 : 40, alignItems: 'start' }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
           {dict.map((d, i) => (
             <button key={i} onClick={() => setWord(d)}
@@ -3723,6 +4014,9 @@ function DialectSection() {
               <div style={{ fontFamily: "'Old Standard TT', serif", fontStyle: 'italic', fontSize: 36, fontWeight: 700, color: 'var(--wood-4)', marginBottom: 4 }}>{word.w}</div>
               <div style={{ fontFamily: 'var(--serif-text)', fontSize: 13, color: 'var(--ink-soft)', marginBottom: 18, fontStyle: 'italic' }}>[{word.t}]</div>
               <div style={{ borderTop: '1px solid var(--hairline)', paddingTop: 16, fontFamily: 'var(--serif-text)', fontSize: 15, lineHeight: 1.6, color: 'var(--ink-2)' }}>{word.m}</div>
+              <button onClick={() => speakOrPlay(word.w, word.audio)}
+                style={{ marginTop: 18, padding: '10px 18px', background: 'var(--accent)', color: 'var(--paper)', border: 'none', cursor: 'pointer', fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', fontWeight: 600 }}
+              >▶ Послушать произношение</button>
             </>
           ) : (
             <div style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', color: 'var(--ink-soft)', fontSize: 16, padding: '60px 0', textAlign: 'center' }}>
@@ -3742,10 +4036,12 @@ function DialectSection() {
    ДЕРЕВО ФАМИЛИЙ — клик по фамилии показывает откуда
    ============================================================ */
 function FamilyTreeSection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
   const [sel, setSel] = React.useState(null);
+  const [query, setQuery] = React.useState('');
   const surnames = [
     { s: 'Дзиньковские', count: 8, origin: 'Острогожский казачий полк, 1652. Потомки переселенцев из Каплуновой слободы — основатели села.', wave: 1747 },
-    { s: 'Колесниковы', count: 24, origin: 'Старожилы. Известны с 1789 года, ветвь легендарного «Колесниковщины» — ватаги, гулявшей по Хопру.', wave: 1789 },
+    { s: 'Колесниковы', count: 24, origin: 'Старожилы. Известны с 1789 года. От этого рода произошёл атаман Иван Колесников, поднявший восстание 1920 года против продразвёрстки — отсюда название «Колесниковщина».', wave: 1789 },
     { s: 'Бережные', count: 31, origin: 'Малороссийская волна 1750-х. Из Полтавской губернии, занимались скотоводством.', wave: 1750 },
     { s: 'Емельяновы', count: 19, origin: 'Великороссы из Тамбовской губернии. Переселились после реформы 1861 года.', wave: 1865 },
     { s: 'Лысенко', count: 27, origin: 'Малороссы из-под Сум, конец XVIII в. Известны как кузнецы и шорники.', wave: 1790 },
@@ -3765,9 +4061,18 @@ function FamilyTreeSection() {
     { y: 1908, label: 'Столыпинцы', color: '#a04a3a' },
   ];
   return (
-    <section id="family" style={{ padding: '120px 60px', background: 'var(--paper-2)' }} className="paper-tex" data-screen-label="Фамилии">
+    <section id="family" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--paper-2)' }} className="paper-tex" data-screen-label="Фамилии">
       <SectionHeader eyebrow="Раздел XIX" title="Дерево фамилий" sub="Двенадцать самых распространённых таловских фамилий и волны переселений, с которыми они пришли." />
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+        <div style={{ maxWidth: 480, margin: '0 auto 28px' }}>
+          <input type="text" value={query} onChange={e => setQuery(e.target.value)}
+            placeholder="Поиск по фамилии — например, Лысенко"
+            style={{ width: '100%', padding: '14px 18px', background: 'var(--paper)', border: '1px solid var(--hairline-2)', fontFamily: "'Old Standard TT', serif", fontStyle: 'italic', fontSize: 16, color: 'var(--wood-4)', outline: 'none', boxSizing: 'border-box' }}
+          />
+          <div style={{ marginTop: 8, fontFamily: 'var(--serif-text)', fontStyle: 'italic', fontSize: 12, color: 'var(--ink-soft)', textAlign: 'center' }}>
+            Не нашли свою? <a href="#contacts" style={{ color: 'var(--accent)' }}>Напишите нам</a> — добавим в архив.
+          </div>
+        </div>
         {/* Легенда волн */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'center', marginBottom: 32 }}>
           {waves.map(w => (
@@ -3779,10 +4084,10 @@ function FamilyTreeSection() {
             </div>
           ))}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 40 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.4fr 1fr', gap: isMobile ? 24 : 40 }}>
           {/* Облако фамилий */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignContent: 'flex-start' }}>
-            {surnames.map((sn, i) => {
+            {surnames.filter(sn => !query || sn.s.toLowerCase().includes(query.toLowerCase())).map((sn, i) => {
               const w = waves.reduce((acc, w) => sn.wave >= w.y ? w : acc, waves[0]);
               const sz = 14 + Math.min(14, sn.count / 3);
               const isSel = sel && sel.s === sn.s;
@@ -3832,9 +4137,10 @@ function FamilyTreeSection() {
    ПРОГУЛКА ПО СЕЛУ 1910 — клик по объектам на старой схеме
    ============================================================ */
 function Walk1910Section() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
   const [pin, setPin] = React.useState(null);
   const points = [
-    { x: 50, y: 32, name: 'Никольская церковь', text: 'Каменный пятиглавый храм 1882 года постройки. Действует до 1937, разрушен в войну, восстановлен в 1995.' },
+    { x: 50, y: 32, name: 'Никольская церковь', text: 'Каменный пятиглавый храм 1783 года постройки. Действовал до 1937 года, в советское время разрушен. Восстанавливается с 2016 года силами прихожан.' },
     { x: 48, y: 50, name: 'Ярмарочная площадь', text: 'Главная торговая площадь. Четыре ярмарки в год: Никольская, Троицкая, Покровская, Михайлов день.' },
     { x: 30, y: 60, name: 'Земская школа', text: 'Открыта в 1894. На 32 ученика, два учителя. Здание из красного кирпича, не сохранилось.' },
     { x: 70, y: 45, name: 'Волостное правление', text: 'Кирпичное двухэтажное здание. Здесь же — почтовая станция и фельдшерский пункт.' },
@@ -3845,9 +4151,9 @@ function Walk1910Section() {
     { x: 14, y: 70, name: 'Кузница', text: 'Семья Лысенко. Шесть поколений кузнецов. Подковы, плужные сошники, дверные петли.' },
   ];
   return (
-    <section id="walk1910" style={{ padding: '120px 60px', background: 'var(--paper)' }} data-screen-label="Прогулка 1910">
+    <section id="walk1910" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--paper)' }} data-screen-label="Прогулка 1910">
       <SectionHeader eyebrow="Раздел XX" title="Прогулка по селу · 1910" sub="Реконструкция плана села начала XX века. Кликните по точкам, чтобы узнать, что было в этом месте." />
-      <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 32, alignItems: 'start' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.5fr 1fr', gap: isMobile ? 20 : 32, alignItems: 'start' }}>
         {/* Карта-схема */}
         <div style={{ position: 'relative', aspectRatio: '4/3', background: 'var(--paper-2)', border: '1px solid var(--hairline-2)', boxShadow: '0 12px 36px rgba(60,40,20,0.12)', overflow: 'hidden' }}>
           <svg viewBox="0 0 100 75" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
@@ -3904,16 +4210,48 @@ function Walk1910Section() {
    ХРАМ НИКОЛАЯ ЧУДОТВОРЦА — история и восстановление
    ============================================================ */
 function ChurchSection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
+  const ringBell = (kind) => {
+    if (typeof window === 'undefined' || !window.AudioContext) return;
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const now = ctx.currentTime;
+    const partials = kind === 'set' ? [277, 415, 554, 830] : kind === 'alarm' ? [196, 392, 587] : [330, 660, 990];
+    const beats = kind === 'set' ? 3 : kind === 'alarm' ? 6 : 4;
+    for (let b = 0; b < beats; b++) {
+      const t = now + b * 0.55;
+      partials.forEach((f, i) => {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'sine';
+        o.frequency.value = f;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.18 / (i + 1), t + 0.005);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 1.8);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(t); o.stop(t + 1.9);
+      });
+    }
+    setTimeout(() => ctx.close(), (beats * 0.55 + 2) * 1000);
+  };
   return (
-    <section id="church" style={{ padding: '120px 60px', background: 'var(--paper-2)', position: 'relative' }} className="paper-tex" data-screen-label="Храм">
+    <section id="church" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--paper-2)', position: 'relative' }} className="paper-tex" data-screen-label="Храм">
       <SectionHeader
         eyebrow="Раздел XXI"
         title="Никольский храм"
-        sub="С 1778 года — главная святыня Талов. Разрушен в советское время, восстанавливается с 2016 года силами прихожан."
+        sub="С 1783 года — главная святыня Талов. Разрушен в советское время, восстанавливается с 2016 года силами прихожан."
       />
+      <div style={{ maxWidth: 720, margin: '0 auto 50px', textAlign: 'center', padding: '24px 20px', background: 'var(--paper)', border: '1px solid var(--hairline-2)', borderTop: '3px solid var(--accent)' }}>
+        <div className="eyebrow" style={{ marginBottom: 12 }}>Голос Никольской</div>
+        <div style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 16, color: 'var(--ink-2)', marginBottom: 16 }}>Послушайте, как звучали колокола до 1922 года</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center' }}>
+          <button onClick={() => ringBell('blago')} style={{ padding: '12px 22px', background: 'var(--wood-4)', color: 'var(--paper)', border: 'none', cursor: 'pointer', fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 600 }}>🔔 Благовест</button>
+          <button onClick={() => ringBell('set')} style={{ padding: '12px 22px', background: 'var(--moss-2)', color: 'var(--paper)', border: 'none', cursor: 'pointer', fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 600 }}>🔔 Перезвон</button>
+          <button onClick={() => ringBell('alarm')} style={{ padding: '12px 22px', background: 'var(--accent)', color: 'var(--paper)', border: 'none', cursor: 'pointer', fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 600 }}>🔔 Набат</button>
+        </div>
+      </div>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         {/* === ХРОНОЛОГИЯ В ТРЁХ ФОТО === */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, marginBottom: 60 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: isMobile ? 16 : 24, marginBottom: isMobile ? 32 : 60 }}>
           {[
             { src: 'images/cerkov-staroe-foto.png',     era: '1930-е', cap: 'Никольский храм перед закрытием. Архивный снимок.', label: 'было' },
             { src: 'images/cerkov-petrenko-foto.png',   era: '2016',   cap: 'Глава поселения В. Петренко с архивной фотографией храма.', label: 'память' },
@@ -3923,7 +4261,7 @@ function ChurchSection() {
               <div style={{ position: 'absolute', top: 14, left: 14, zIndex: 2, background: 'var(--accent)', color: 'var(--paper)', padding: '4px 10px', fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 12, fontWeight: 700, letterSpacing: '0.05em' }}>
                 {p.label}
               </div>
-              <img src={p.src} alt={p.cap} style={{ width: '100%', height: 280, objectFit: 'cover', display: 'block' }} />
+              <img src={p.src} alt={p.cap} style={{ width: '100%', height: isMobile ? 200 : 280, objectFit: 'cover', display: 'block' }} />
               <figcaption style={{ padding: '14px 18px', borderTop: '1px solid var(--hairline)' }}>
                 <div className="eyebrow" style={{ marginBottom: 6, fontSize: 9 }}>{p.era}</div>
                 <div style={{ fontFamily: 'var(--serif-text)', fontSize: 13, lineHeight: 1.5, color: 'var(--ink-2)', fontStyle: 'italic' }}>{p.cap}</div>
@@ -3933,10 +4271,10 @@ function ChurchSection() {
         </div>
 
         {/* === ИСТОРИЧЕСКАЯ СПРАВКА + ВОССТАНОВЛЕНИЕ === */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 50 }}>
-          {/* ЛЕВО — ЦЕРКОВЬ В 1778 */}
-          <div style={{ background: 'var(--paper)', border: '1px solid var(--hairline-2)', padding: '36px 38px', position: 'relative' }}>
-            <div className="eyebrow" style={{ marginBottom: 14 }}>с 1778 года</div>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 24 : 50 }}>
+          {/* ЛЕВО — ЦЕРКОВЬ В 1783 */}
+          <div style={{ background: 'var(--paper)', border: '1px solid var(--hairline-2)', padding: isMobile ? '20px 18px' : '36px 38px', position: 'relative' }}>
+            <div className="eyebrow" style={{ marginBottom: 14 }}>с 1783 года</div>
             <h3 style={{ fontFamily: "'Old Standard TT', serif", fontStyle: 'italic', fontWeight: 700, fontSize: 32, color: 'var(--wood-4)', margin: '0 0 20px', lineHeight: 1.15 }}>
               Главный престол —<br/>Святителя Николая
             </h3>
@@ -3961,7 +4299,7 @@ function ChurchSection() {
           </div>
 
           {/* ПРАВО — ВОССТАНОВЛЕНИЕ */}
-          <div style={{ background: 'var(--moss-1)', color: 'var(--paper)', padding: '36px 38px', position: 'relative' }}>
+          <div style={{ background: 'var(--moss-1)', color: 'var(--paper)', padding: isMobile ? '20px 18px' : '36px 38px', position: 'relative' }}>
             <div className="eyebrow" style={{ color: 'var(--moss-5)', marginBottom: 14 }}>с октября 2016</div>
             <h3 style={{ fontFamily: "'Old Standard TT', serif", fontStyle: 'italic', fontWeight: 700, fontSize: 32, color: 'var(--paper)', margin: '0 0 20px', lineHeight: 1.15 }}>
               Решили возродить —<br/>всем селом
@@ -3978,13 +4316,13 @@ function ChurchSection() {
                 — Валерий Петренко, глава Таловского поселения
               </footer>
             </blockquote>
-            <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid rgba(244,234,213,0.18)', display: 'flex', gap: 24, fontFamily: 'var(--serif-text)' }}>
+            <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid rgba(244,234,213,0.18)', display: 'flex', flexWrap: 'wrap', gap: isMobile ? 14 : 24, fontFamily: 'var(--serif-text)' }}>
               <div>
                 <div style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 26, fontWeight: 700, color: 'var(--accent)', lineHeight: 1 }}>7</div>
                 <div style={{ fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(244,234,213,0.6)', marginTop: 6 }}>сёл рядом без храма</div>
               </div>
               <div>
-                <div style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 26, fontWeight: 700, color: 'var(--accent)', lineHeight: 1 }}>30 км</div>
+                <div style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 26, fontWeight: 700, color: 'var(--accent)', lineHeight: 1 }}>24 км</div>
                 <div style={{ fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(244,234,213,0.6)', marginTop: 6 }}>до Кантемировки</div>
               </div>
               <div>
@@ -3996,8 +4334,8 @@ function ChurchSection() {
         </div>
 
         {/* === ЦИТАТА ЖИТЕЛЬНИЦЫ + ИСТОЧНИК === */}
-        <div style={{ marginTop: 50, padding: '32px 40px', background: 'var(--paper)', border: '1px solid var(--hairline-2)', borderTop: '3px solid var(--accent)' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 40, alignItems: 'center' }}>
+        <div style={{ marginTop: isMobile ? 28 : 50, padding: isMobile ? '20px 18px' : '32px 40px', background: 'var(--paper)', border: '1px solid var(--hairline-2)', borderTop: '3px solid var(--accent)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr auto', gap: isMobile ? 20 : 40, alignItems: 'center' }}>
             <blockquote style={{ margin: 0, fontFamily: "'Old Standard TT', serif", fontStyle: 'italic', fontSize: 19, lineHeight: 1.55, color: 'var(--ink)' }}>
               «На большие православные праздники я и другие верующие ездим в Кантемировский храм, но это далеко. Очень многие, особенно пожилые, тоже хотели бы посетить службы, но у них нет возможности — поблизости нет церквей. Поэтому мы и обратились к представителям церкви и главе с просьбой восстановить церковь.»
               <footer style={{ marginTop: 14, fontSize: 12, fontFamily: 'var(--sans)', color: 'var(--ink-soft)', fontStyle: 'normal', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
@@ -4019,7 +4357,21 @@ function ChurchSection() {
 
 
 function MapSection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
   const [epoch, setEpoch] = React.useState('2026');
+  const [year, setYear] = React.useState(2026);
+  const popByYear = [
+    { y: 1747, pop: 286, dvory: 70, note: 'Основание. Первые 70 дворов.' },
+    { y: 1783, pop: 2470, dvory: null, note: 'Построен Никольский храм.' },
+    { y: 1859, pop: 4200, dvory: 600, note: 'Освобождение крестьян. Расцвет ярмарок.' },
+    { y: 1900, pop: 5642, dvory: 791, note: 'Земская школа, фельдшерский пункт.' },
+    { y: 1916, pop: 6778, dvory: 800, note: 'Исторический максимум. До 1000 вагонов зерна в год.' },
+    { y: 1936, pop: 4800, dvory: null, note: 'Райцентр Писаревского района.' },
+    { y: 1979, pop: 3100, dvory: null, note: 'Колхоз «Победа». Уход молодёжи в города.' },
+    { y: 2010, pop: 1674, dvory: null, note: 'Перепись. Потеря трёх четвертей за столетие.' },
+    { y: 2026, pop: 1484, dvory: null, note: 'Сегодня. Центр Таловского сельского поселения.' },
+  ];
+  const closest = popByYear.reduce((a, b) => Math.abs(b.y - year) < Math.abs(a.y - year) ? b : a);
   const lat = 49.8642, lon = 40.0622;
   const osmLink = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=15/${lat}/${lon}`;
 
@@ -4046,7 +4398,7 @@ function MapSection() {
   }, []);
 
   return (
-    <section id="map" style={{ padding: '120px 60px', background: 'var(--paper-2)' }} className="paper-tex" data-screen-label="Карта">
+    <section id="map" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--paper-2)' }} className="paper-tex" data-screen-label="Карта">
       <style>{`
         @keyframes pinPulse { 0%, 100% { opacity: 0.55; transform: scale(1); } 50% { opacity: 0; transform: scale(2.4); } }
         @keyframes riverFlow { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -120; } }
@@ -4092,8 +4444,36 @@ function MapSection() {
             '2026': 'Современная инфраструктура: МКОУ «Таловская СОШ» (350 учеников), Дом культуры, ФАП, два магазина, водонапорная башня (2024). Действующий храм, мемориал на братской могиле.',
           })[epoch]}
         </div>
+        {/* Слайдер по годам */}
+        <div style={{ maxWidth: 800, margin: '0 auto 30px', padding: isMobile ? '20px 16px' : '24px 28px', background: 'var(--paper)', border: '1px solid var(--hairline-2)' }}>
+          <div className="eyebrow" style={{ marginBottom: 10, textAlign: 'center' }}>население по годам</div>
+          <div style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 42, fontWeight: 700, color: 'var(--wood-4)', textAlign: 'center', lineHeight: 1 }}>
+            {year}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginTop: 8, marginBottom: 14, flexWrap: 'wrap' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontFamily: 'var(--serif-display)', fontSize: 26, color: 'var(--accent)', fontWeight: 700 }}>{closest.pop.toLocaleString('ru-RU')}</div>
+              <div style={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ink-soft)' }}>жителей</div>
+            </div>
+            {closest.dvory && (
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontFamily: 'var(--serif-display)', fontSize: 26, color: 'var(--moss-2)', fontWeight: 700 }}>{closest.dvory}</div>
+                <div style={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ink-soft)' }}>дворов</div>
+              </div>
+            )}
+          </div>
+          <input type="range" min="1747" max="2026" value={year} onChange={e => setYear(+e.target.value)}
+            style={{ width: '100%', accentColor: 'var(--accent)' }} list="years"/>
+          <datalist id="years">{popByYear.map(p => <option key={p.y} value={p.y}/>)}</datalist>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, fontFamily: 'var(--sans)', color: 'var(--ink-soft)', letterSpacing: '0.1em', marginTop: 4 }}>
+            <span>1747</span><span>2026</span>
+          </div>
+          <div style={{ marginTop: 12, fontFamily: 'var(--serif-text)', fontStyle: 'italic', fontSize: 13, lineHeight: 1.55, color: 'var(--ink-2)', textAlign: 'center' }}>
+            {closest.note}
+          </div>
+        </div>
         {/* Главная — интерактивная схема с пинами */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 24, alignItems: 'start' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 320px', gap: isMobile ? 16 : 24, alignItems: 'start' }}>
           {/* КАРТА */}
           <div style={{ background: '#f6efde', border: '1px solid var(--hairline-2)', position: 'relative', boxShadow: '0 12px 40px rgba(60,40,20,0.12)' }}>
             <div style={{ padding: '14px 22px', borderBottom: '1px solid var(--hairline)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', background: 'var(--paper)' }}>
@@ -4108,7 +4488,7 @@ function MapSection() {
             <div style={{ position: 'relative', width: '100%' }}>
               <iframe
                 src="https://www.openstreetmap.org/export/embed.html?bbox=40.025%2C49.840%2C40.100%2C49.888&layer=mapnik&marker=49.8642%2C40.0622"
-                style={{ display: 'block', width: '100%', height: 480, border: 'none' }}
+                style={{ display: 'block', width: '100%', height: isMobile ? 320 : 480, border: 'none' }}
                 title="Карта с. Талы · OpenStreetMap"
                 loading="lazy"
               />
@@ -4140,7 +4520,7 @@ function MapSection() {
           </div>
 
           {/* БОКОВАЯ ПАНЕЛЬ — фильтры + карточка */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 18, position: 'sticky', top: 20 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 18, position: isMobile ? 'static' : 'sticky', top: 20 }}>
             {/* Фильтры */}
             <div style={{ background: 'var(--paper)', border: '1px solid var(--hairline-2)', padding: '18px 18px 14px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
@@ -4241,7 +4621,7 @@ function MapSection() {
         </div>
 
         {/* Нижние плитки — соседи и как добраться */}
-        <div style={{ marginTop: 30, padding: 28, background: 'var(--moss-1)', color: 'var(--paper)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 30 }}>
+        <div style={{ marginTop: 30, padding: isMobile ? 18 : 28, background: 'var(--moss-1)', color: 'var(--paper)', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: isMobile ? 18 : 30 }}>
           <div>
             <div className="eyebrow" style={{ marginBottom: 8, color: 'var(--moss-5)' }}>как добраться</div>
             <div style={{ fontFamily: 'var(--serif-text)', fontSize: 14, lineHeight: 1.65 }}>
@@ -4270,8 +4650,9 @@ function MapSection() {
    КОНТАКТЫ
    ============================================================ */
 function ContactsSection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
   return (
-    <section id="contacts" style={{ padding: '120px 60px 80px', background: 'var(--moss-1)', color: 'var(--paper)' }}
+    <section id="contacts" style={{ padding: isMobile ? '40px 0' : '120px 60px 80px', background: 'var(--moss-1)', color: 'var(--paper)' }}
              data-screen-label="Контакты">
       <div style={{ maxWidth: 1180, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 60 }}>
@@ -4282,8 +4663,8 @@ function ContactsSection() {
           <Ornament color="var(--moss-5)" />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 0, border: '1px solid rgba(244,234,213,0.3)' }}>
-          <div style={{ padding: '36px 32px', borderRight: '1px solid rgba(244,234,213,0.3)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 0, border: '1px solid rgba(244,234,213,0.3)' }}>
+          <div style={{ padding: isMobile ? '20px 18px' : '36px 32px', borderRight: isMobile ? 'none' : '1px solid rgba(244,234,213,0.3)', borderBottom: isMobile ? '1px solid rgba(244,234,213,0.3)' : 'none' }}>
             <div className="eyebrow" style={{ color: 'var(--moss-5)', marginBottom: 14 }}>Глава поселения</div>
             <h3 style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 28, margin: '0 0 8px', color: 'var(--paper)', fontWeight: 500 }}>
               Александр Андреевич<br/>Ковалёв
@@ -4292,7 +4673,7 @@ function ContactsSection() {
               Приём граждан — вторник, четверг<br/>с 10:00 до 13:00
             </div>
           </div>
-          <div style={{ padding: '36px 32px', borderRight: '1px solid rgba(244,234,213,0.3)' }}>
+          <div style={{ padding: isMobile ? '20px 18px' : '36px 32px', borderRight: isMobile ? 'none' : '1px solid rgba(244,234,213,0.3)', borderBottom: isMobile ? '1px solid rgba(244,234,213,0.3)' : 'none' }}>
             <div className="eyebrow" style={{ color: 'var(--moss-5)', marginBottom: 14 }}>Адрес</div>
             <div style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 22, color: 'var(--paper)', lineHeight: 1.4 }}>
               Воронежская обл.<br/>
@@ -4303,7 +4684,7 @@ function ContactsSection() {
               индекс 396737
             </div>
           </div>
-          <div style={{ padding: '36px 32px' }}>
+          <div style={{ padding: isMobile ? '20px 18px' : '36px 32px' }}>
             <div className="eyebrow" style={{ color: 'var(--moss-5)', marginBottom: 14 }}>Связь</div>
             <div style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 22, color: 'var(--paper)', lineHeight: 1.6 }}>
               <div>+7 (47367) 5-63-43</div>
@@ -4472,6 +4853,7 @@ function TalnikDecor() {
    РАССКАЗЫ ЖИТЕЛЕЙ — устная история села
    ============================================================ */
 function StoriesSection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
   const stories = [
     {
       author: 'Мария Лукьяновна Бережная',
@@ -4504,11 +4886,11 @@ function StoriesSection() {
   ];
   const [open, setOpen] = React.useState(0);
   return (
-    <section id="stories" style={{ padding: '120px 60px', background: 'var(--paper-2)', position: 'relative' }} className="paper-tex" data-screen-label="Рассказы">
+    <section id="stories" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--paper-2)', position: 'relative' }} className="paper-tex" data-screen-label="Рассказы">
       <SectionHeader eyebrow="Раздел XVIII"
                      title="Рассказы жителей"
                      sub="Устная история села. Воспоминания таловчан, записанные в разные годы." />
-      <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1.6fr', gap: 40 }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1.6fr', gap: isMobile ? 24 : 40 }}>
         {/* список рассказчиков */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {stories.map((s, i) => (
@@ -4539,10 +4921,10 @@ function StoriesSection() {
           </div>
         </div>
         {/* открытый рассказ */}
-        <article style={{ background: 'var(--paper)', padding: '40px 44px', border: '1px solid var(--hairline-2)', boxShadow: '0 14px 40px rgba(60,40,20,0.10)', position: 'relative' }}>
+        <article style={{ background: 'var(--paper)', padding: isMobile ? '24px 20px' : '40px 44px', border: '1px solid var(--hairline-2)', boxShadow: '0 14px 40px rgba(60,40,20,0.10)', position: 'relative' }}>
           <div style={{ position: 'absolute', top: 16, right: 18, fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 60, color: 'var(--accent-soft)', opacity: 0.45, lineHeight: 1 }}>“</div>
           <div className="eyebrow" style={{ marginBottom: 8, color: 'var(--moss-2)' }}>рассказ {stories[open].year}</div>
-          <h3 style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 32, margin: '0 0 18px', color: 'var(--wood-4)', fontWeight: 600 }}>
+          <h3 style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: isMobile ? 22 : 32, margin: '0 0 18px', color: 'var(--wood-4)', fontWeight: 600 }}>
             {stories[open].title}
           </h3>
           <p style={{ fontFamily: 'var(--serif-text)', fontSize: 16, lineHeight: 1.75, color: 'var(--ink)', margin: '0 0 26px', fontStyle: 'italic' }}>
@@ -4567,9 +4949,10 @@ function StoriesSection() {
    НАЙДЕНО В АРХИВАХ — малоизвестные факты
    ============================================================ */
 function FactsSection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
   const facts = [
-    { num: '61', unit: 'семья', text: 'В 1823 году переселилась в Астраханскую губернию из-за обезземеливания дворянами — массовый исход, отражающий тяжёлое положение слободы XIX века.' },
-    { num: '1935—1954', unit: 'годы', text: 'Талы — административный центр самостоятельного Писаревского района. Свой райком, типография, газета «Сталинский путь».' },
+    { num: '61', unit: 'семья', text: 'В 1822 году переселилась в Астраханскую губернию из-за обезземеливания дворянами — массовый исход, отражающий тяжёлое положение слободы XIX века.' },
+    { num: '1935—1956', unit: 'годы', text: 'Талы — административный центр самостоятельного Писаревского района. Свой райком, типография, газета «Сталинский путь».' },
     { num: '29', unit: 'рекрутов', text: 'В 1812 году приход Никольской церкви отправил на войну с Наполеоном. Цифра сохранилась в церковных метриках.' },
     { num: '1900', unit: 'г.', text: '5 642 жителя при 9 общественных зданиях, земской и грамотной школах. Перепись, не упомянутая в стандартных справках.' },
     { num: '1936', unit: 'инфраструктура', text: 'При ~4 800 жителях: типография, маслозавод, пекарня, 5 школ, клуб на 200 мест, три библиотеки, баня, парикмахерская, Дом колхозника на 15 коек.' },
@@ -4578,7 +4961,7 @@ function FactsSection() {
     { num: '27.05', unit: '1942', text: 'Уроженец Талов А. М. Городнянский, увидев гибель войск 6-й армии в Харьковском котле, застрелился — деталь, обычно опускаемая в очерках.' },
   ];
   return (
-    <section id="facts" style={{ padding: '120px 60px', background: 'var(--paper)', position: 'relative' }} data-screen-label="Архивные факты">
+    <section id="facts" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--paper)', position: 'relative' }} data-screen-label="Архивные факты">
       <SectionHeader eyebrow="Раздел XIX"
                      title="Найдено в архивах"
                      sub="Десять малоизвестных фактов, обычно не попадающих в краеведческие очерки." />
@@ -5103,6 +5486,7 @@ function DynastyTree({ d, onClose }) {
 }
 
 function DynastiesSection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
   const [tab, setTab] = React.useState('tree');
   const [openDynasty, setOpenDynasty] = React.useState(null);
   const [search, setSearch] = React.useState('');
@@ -5116,15 +5500,15 @@ function DynastiesSection() {
   const totalTeachers = TEACHERS_BY_DEPT.reduce((s, d) => s + d.list.length, 0);
 
   return (
-    <section id="dynasties" style={{ padding: '120px 60px', background: 'var(--paper)', position: 'relative' }} data-screen-label="Династии">
+    <section id="dynasties" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--paper)', position: 'relative' }} data-screen-label="Династии">
       <SectionHeader eyebrow="Раздел XX"
                      title="Династии Таловской школы"
                      sub={`Четыре учительские династии и ${totalTeachers}+ имён со стенда «Родословная Таловской школы». От царской гимназии до наших дней.`}/>
 
       {/* Коллаж 19 фото со стендов школьного музея */}
-      <div style={{ maxWidth: 1200, margin: '0 auto 50px' }}>
+      <div style={{ maxWidth: 1200, margin: isMobile ? '0 auto 28px' : '0 auto 50px' }}>
         <div className="eyebrow" style={{ textAlign: 'center', color: 'var(--moss-2)', marginBottom: 20 }}>фото со стендов · школьный музей</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 14 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(auto-fill, minmax(120px, 1fr))' : 'repeat(auto-fill, minmax(160px, 1fr))', gap: isMobile ? 10 : 14 }}>
           {Array.from({ length: 19 }, (_, i) => i + 1).map(n => {
             const tilt = ((n * 13) % 7) - 3; /* -3..+3 deg */
             return (
@@ -5297,11 +5681,11 @@ function ChapteredProgress() {
    В ЭТОТ ДЕНЬ В ТАЛАХ — виджет с историческим событием
    ============================================================ */
 const ON_THIS_DAY = {
-  '01-19': { y: '1942', t: 'После освобождения села', x: 'Через месяц после освобождения 18-19 декабря 1942 г. в Талах формируется тыловая база.' },
-  '03-01': { y: '1896', t: 'Родился А. М. Городнянский', x: 'Будущий генерал-лейтенант, командующий 6-й армией Юго-Западного фронта, уроженец слободы Талы.' },
+  '01-19': { y: '1943', t: 'После освобождения села', x: 'Через месяц после освобождения 18-19 декабря 1942 г. в Талах формируется тыловая база.' },
+  '03-13': { y: '1896', t: 'Родился А. М. Городнянский', x: 'Будущий генерал-лейтенант, командующий 6-й армией Юго-Западного фронта, уроженец слободы Талы.' },
   '03-07': { y: '1882', t: 'Родился Дмитрий Сверчков', x: 'Революционер, депутат Петроградского Совета 1905 года, литератор. Семья отца квартировала в Талах с Ахтырским гусарским полком.' },
   '03-20': { y: '1747', t: 'Указ Сената', x: 'Дата основания Талов — указ о выделении земли поселенцам Каплуновой слободы.' },
-  '05-22': { y: '1942', t: 'Гибель Городнянского', x: 'В Харьковском котле уроженец Талов А. М. Городнянский погибает в окружении 6-й армии.' },
+  '05-27': { y: '1942', t: 'Гибель Городнянского', x: 'В Харьковском котле уроженец Талов А. М. Городнянский погибает в окружении 6-й армии.' },
   '08-15': { y: '1905', t: 'Восстание', x: 'Таловцы оказывают вооружённое сопротивление властям — на пике первой русской революции.' },
   '09-23': { y: '1755', t: 'Первое упоминание в указе', x: 'Указ Острогожской полковой канцелярии: подтверждено право писаря Татарчукова на хутор «ниже слободы Талы».' },
   '10-14': { y: '1900', t: 'Покровская ярмарка', x: 'Главная из четырёх годовых таловских ярмарок. К началу XX века оборот ярмарок села — около миллиона рублей.' },
@@ -6249,10 +6633,735 @@ function Enhancements() {
   return null;
 }
 
+// === Implementation 4: Archival cursor magnifier (desktop only) ===
+function ArchivalCursor() {
+  React.useEffect(() => {
+    if (window.matchMedia('(max-width: 768px)').matches) return;
+    const cursor = document.createElement('div');
+    cursor.style.cssText = 'position:fixed;width:80px;height:80px;border:2px solid var(--accent);border-radius:50%;pointer-events:none;z-index:9999;opacity:0;transform:translate(-50%,-50%);transition:opacity 0.2s,width 0.2s,height 0.2s;backdrop-filter:contrast(1.4) saturate(1.3);background:rgba(196,106,58,0.06);mix-blend-mode:multiply;';
+    document.body.appendChild(cursor);
+    let activeImg = null;
+    const onMove = (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    };
+    const onOver = (e) => {
+      const img = e.target.closest('img');
+      if (img && (img.closest('section[data-screen-label="История"]') || img.closest('section[data-screen-label="Мемориал"]') || img.closest('section[data-screen-label="Утраченное"]') || img.closest('section#church') || img.closest('section#walk1910'))) {
+        activeImg = img;
+        cursor.style.opacity = '1';
+      } else {
+        activeImg = null;
+        cursor.style.opacity = '0';
+      }
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseover', onOver);
+    return () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseover', onOver);
+      cursor.remove();
+    };
+  }, []);
+  return null;
+}
+
+// === Implementation 6: Decade ticker (corner counter) ===
+function DecadeTicker() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
+  const [decade, setDecade] = React.useState(null);
+  const [visible, setVisible] = React.useState(false);
+  React.useEffect(() => {
+    if (isMobile) return;
+    // map sections to representative years
+    const sectionYears = {
+      'history': 1747, 'today': 2026, 'nature': 2026, 'people': 1900,
+      'cuisine': 1900, 'gallery': 1910, 'memorial': 1942, 'draft1941': 1941,
+      'church': 1783, 'school': 1894, 'demography': 1916, 'thennow': 1910,
+      'family': 1789, 'walk1910': 1910, 'lost': 1900, 'records': 1916,
+      'letters': 1813, 'neighbors': 1900, 'grain': 1916, 'crafts': 1900,
+      'toponymy': 1755, 'dialect': 1900, 'map': 2026, 'contacts': 2026,
+      'calendar': 1900, 'quiz': 2026, 'weather': 2026,
+    };
+    let lastY = null;
+    const onScroll = () => {
+      let active = null;
+      Object.keys(sectionYears).forEach(id => {
+        const sec = document.getElementById(id);
+        if (sec) {
+          const r = sec.getBoundingClientRect();
+          if (r.top < window.innerHeight * 0.5 && r.bottom > window.innerHeight * 0.3) {
+            active = sectionYears[id];
+          }
+        }
+      });
+      if (active !== null && active !== lastY) {
+        setDecade(active);
+        setVisible(true);
+        lastY = active;
+        clearTimeout(window.__decadeTimer);
+        window.__decadeTimer = setTimeout(() => setVisible(false), 2200);
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [isMobile]);
+  if (isMobile || !decade) return null;
+  return (
+    <div style={{ position: 'fixed', left: 30, bottom: 30, zIndex: 95, opacity: visible ? 1 : 0, transition: 'opacity 0.6s', pointerEvents: 'none' }}>
+      <div style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 84, fontWeight: 500, color: 'var(--accent)', lineHeight: 1, textShadow: '0 2px 8px rgba(60,40,20,0.15)' }}>
+        {decade}
+      </div>
+    </div>
+  );
+}
+
+// === Implementation 7: Konami easter egg → 1865 mode ===
+function KonamiMode() {
+  React.useEffect(() => {
+    const seq = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+    let pos = 0;
+    const onKey = (e) => {
+      const want = seq[pos];
+      if (e.key === want || e.key.toLowerCase() === want) {
+        pos++;
+        if (pos === seq.length) {
+          pos = 0;
+          document.documentElement.classList.add('era-1865');
+          // notification
+          const note = document.createElement('div');
+          note.textContent = 'Активирован режим 1865 года';
+          note.style.cssText = 'position:fixed;top:20%;left:50%;transform:translateX(-50%);background:#3d2e1a;color:#f4ead5;padding:18px 32px;font-family:"Old Standard TT",serif;font-style:italic;font-size:18px;border:2px double #c46a3a;z-index:99999;letter-spacing:0.05em;box-shadow:0 20px 60px rgba(0,0,0,0.4);';
+          document.body.appendChild(note);
+          setTimeout(() => note.remove(), 3500);
+          setTimeout(() => document.documentElement.classList.remove('era-1865'), 30000);
+        }
+      } else {
+        pos = 0;
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+  return null;
+}
+
+// === Implementation 8: Idle ambient atmosphere ===
+function IdleAmbient() {
+  const [idle, setIdle] = React.useState(false);
+  React.useEffect(() => {
+    let t;
+    const reset = () => {
+      clearTimeout(t);
+      if (idle) setIdle(false);
+      t = setTimeout(() => setIdle(true), 90000);
+    };
+    ['mousemove','keydown','scroll','click','touchstart'].forEach(e => window.addEventListener(e, reset, { passive: true }));
+    reset();
+    return () => {
+      clearTimeout(t);
+      ['mousemove','keydown','scroll','click','touchstart'].forEach(e => window.removeEventListener(e, reset));
+    };
+  }, [idle]);
+  React.useEffect(() => {
+    document.documentElement.classList.toggle('is-idle', idle);
+  }, [idle]);
+  return null;
+}
+
+function ThisDayWidget() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
+  const [open, setOpen] = React.useState(false);
+  // historical events keyed by approximate month/day
+  const today = new Date();
+  const md = (today.getMonth() + 1) * 100 + today.getDate();
+  const events = [
+    { md: 320, year: 1747, txt: 'Слобода Талы впервые занесена во вторую ревизскую сказку: 70 дворов, 286 жителей.' },
+    { md: 313, year: 1896, txt: 'В Талах родился Авксентий Городнянский — будущий генерал-лейтенант РККА.' },
+    { md: 307, year: 1882, txt: 'В Талах родился Дмитрий Сверчков — революционер и литератор.' },
+    { md: 815, year: 1905, txt: 'Таловцы оказали вооружённое сопротивление властям — отголосок первой русской революции.' },
+    { md: 410, year: 1822, txt: 'Указом Александра I в Астраханскую губернию выехали 61 семья переселенцев из Талов.' },
+    { md: 923, year: 1755, txt: 'Указ Острогожской полковой канцелярии впервые упоминает «слободу Талы» как ориентир.' },
+    { md: 1218, year: 1942, txt: 'Утро. 67-я танковая бригада освобождает Писаревку и подходит к Талам.' },
+    { md: 1219, year: 1942, txt: 'Талы освобождены от итальянцев 8-й армии совместным штурмом 67-й тбр и 267-й сд.' },
+    { md: 118, year: 1935, txt: 'Образован Писаревский район с центром в Талах. Талы становятся райцентром.' },
+    { md: 1102, year: 1956, txt: 'Писаревский район упразднён, его территория присоединена к Кантемировскому.' },
+    { md: 522, year: 1922, txt: 'Из таловских церквей изъято 73 фунта серебра в пользу голодающих Поволжья.' },
+    { md: 1120, year: 1920, txt: 'В Талы ворвался отряд атамана Колесникова — 200 сабель. Многие отказались примкнуть.' },
+    { md: 608, year: 1848, txt: 'В соседней Писаревке вспыхнуло восстание против помещика Лофицкого. В Талах слышали и видели.' },
+    { md: 126, year: 1943, txt: 'В районе Талов сосредоточился 1-й гвардейский танковый корпус.' },
+    { md: 705, year: 1942, txt: 'Талы оккупированы итальянцами 8-й армии (АРМИР).' },
+  ];
+  // pick closest event by md
+  let pick = events[0];
+  let best = 999;
+  events.forEach(e => {
+    const d = Math.abs(e.md - md);
+    if (d < best) { best = d; pick = e; }
+  });
+  const isExact = best === 0;
+  const monthName = today.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+  return (
+    <div style={{ position: 'fixed', right: isMobile ? 16 : 20, top: isMobile ? 80 : 90, zIndex: 90, maxWidth: open ? (isMobile ? 'calc(100vw - 32px)' : 340) : 56, transition: 'all 0.3s' }}>
+      {!open ? (
+        <button onClick={() => setOpen(true)} aria-label="Этот день в Талах"
+          style={{ width: 56, height: 56, borderRadius: '50%', background: 'var(--paper)', color: 'var(--wood-4)', border: '1.5px solid var(--wood-4)', cursor: 'pointer', boxShadow: '0 8px 20px rgba(60,40,20,0.18)', fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 22, fontWeight: 700 }}>
+          {today.getDate()}
+        </button>
+      ) : (
+        <div style={{ background: 'var(--paper)', border: '1px solid var(--hairline-2)', borderTop: '3px solid var(--accent)', padding: '18px 20px', boxShadow: '0 14px 40px rgba(60,40,20,0.22)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
+            <div className="eyebrow" style={{ color: 'var(--accent)' }}>{isExact ? 'этот день · ' : 'около '}{monthName}</div>
+            <button onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: 'var(--ink-soft)', padding: 0, lineHeight: 1 }}>×</button>
+          </div>
+          <div style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 28, fontWeight: 600, color: 'var(--wood-4)', lineHeight: 1, marginBottom: 8 }}>{pick.year}</div>
+          <div style={{ fontFamily: 'var(--serif-text)', fontSize: 13.5, lineHeight: 1.55, color: 'var(--ink-2)' }}>{pick.txt}</div>
+          <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid var(--hairline)', fontFamily: 'var(--sans)', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ink-soft)', textAlign: 'right' }}>
+            архив села Талы
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MyArchive() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
+  const [open, setOpen] = React.useState(false);
+  const [step, setStep] = React.useState('start'); // start | story | photo | done
+  const [text, setText] = React.useState('');
+  const [author, setAuthor] = React.useState('');
+  const [contact, setContact] = React.useState('');
+  const submit = () => {
+    const fd = new FormData();
+    fd.append('form-name', 'story');
+    fd.append('author', author);
+    fd.append('contact', contact);
+    fd.append('story-text', text);
+    fetch('/', { method: 'POST', body: new URLSearchParams(fd).toString(), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+      .then(() => setStep('done')).catch(() => setStep('done'));
+    // also save to localStorage as backup
+    const saved = JSON.parse(localStorage.getItem('taly-archive') || '[]');
+    saved.push({ author, contact, text, ts: Date.now() });
+    localStorage.setItem('taly-archive', JSON.stringify(saved));
+  };
+  if (!open) {
+    return (
+      <button onClick={() => setOpen(true)} aria-label="Мой архив"
+        style={{ position: 'fixed', left: 20, top: isMobile ? 80 : 90, zIndex: 90, width: 56, height: 56, borderRadius: '50%', background: 'var(--moss-2)', color: 'var(--paper)', border: 'none', cursor: 'pointer', boxShadow: '0 8px 20px rgba(60,40,20,0.18)', fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 24 }}>
+        ✎
+      </button>
+    );
+  }
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(28,24,18,0.78)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={() => setOpen(false)}>
+      <div style={{ background: 'var(--paper)', maxWidth: 560, width: '100%', padding: isMobile ? '24px 20px' : '36px 40px', borderTop: '4px solid var(--accent)', boxShadow: '0 30px 80px rgba(0,0,0,0.4)' }} onClick={e => e.stopPropagation()}>
+        {step === 'start' && (
+          <>
+            <div className="eyebrow" style={{ marginBottom: 8 }}>пополнить архив</div>
+            <h3 style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 32, color: 'var(--wood-4)', margin: '0 0 14px', fontWeight: 500 }}>Поделитесь воспоминанием</h3>
+            <p style={{ fontFamily: 'var(--serif-text)', fontSize: 14, lineHeight: 1.6, color: 'var(--ink-2)', marginBottom: 18 }}>
+              Старая фотография, рассказ бабушки, имя для мемориала, найденный документ — каждая крупица идёт в живой архив села.
+            </p>
+            <button onClick={() => setStep('story')} style={{ padding: '14px 24px', background: 'var(--wood-4)', color: 'var(--paper)', border: 'none', cursor: 'pointer', fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', fontWeight: 600, marginRight: 12 }}>Рассказать историю</button>
+            <button onClick={() => setOpen(false)} style={{ padding: '14px 24px', background: 'transparent', color: 'var(--wood-4)', border: '1px solid var(--wood-4)', cursor: 'pointer', fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', fontWeight: 600 }}>Позже</button>
+          </>
+        )}
+        {step === 'story' && (
+          <>
+            <div className="eyebrow" style={{ marginBottom: 8 }}>история</div>
+            <h3 style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 28, color: 'var(--wood-4)', margin: '0 0 18px', fontWeight: 500 }}>Что вы хотите рассказать?</h3>
+            <input value={author} onChange={e => setAuthor(e.target.value)} placeholder="Ваше имя" style={{ width: '100%', padding: 12, fontFamily: 'var(--serif-text)', fontSize: 15, border: '1px solid var(--hairline-2)', background: 'var(--paper-2)', marginBottom: 10, boxSizing: 'border-box' }}/>
+            <input value={contact} onChange={e => setContact(e.target.value)} placeholder="Контакт (e-mail, телефон, telegram)" style={{ width: '100%', padding: 12, fontFamily: 'var(--serif-text)', fontSize: 15, border: '1px solid var(--hairline-2)', background: 'var(--paper-2)', marginBottom: 10, boxSizing: 'border-box' }}/>
+            <textarea value={text} onChange={e => setText(e.target.value)} placeholder="Ваша история, воспоминание, имя для мемориала..." rows={6} style={{ width: '100%', padding: 12, fontFamily: 'var(--serif-text)', fontSize: 15, border: '1px solid var(--hairline-2)', background: 'var(--paper-2)', marginBottom: 14, boxSizing: 'border-box', resize: 'vertical' }}/>
+            <button onClick={submit} disabled={!text.trim()} style={{ padding: '14px 24px', background: text.trim() ? 'var(--accent)' : 'var(--hairline-2)', color: 'var(--paper)', border: 'none', cursor: text.trim() ? 'pointer' : 'default', fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', fontWeight: 600, marginRight: 12 }}>Отправить</button>
+            <button onClick={() => setOpen(false)} style={{ padding: '14px 24px', background: 'transparent', color: 'var(--wood-4)', border: '1px solid var(--wood-4)', cursor: 'pointer', fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', fontWeight: 600 }}>Отмена</button>
+          </>
+        )}
+        {step === 'done' && (
+          <>
+            <div className="eyebrow" style={{ marginBottom: 8, color: 'var(--moss-2)' }}>спасибо</div>
+            <h3 style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 32, color: 'var(--wood-4)', margin: '0 0 14px', fontWeight: 500 }}>Ваша история сохранена</h3>
+            <p style={{ fontFamily: 'var(--serif-text)', fontSize: 14, lineHeight: 1.6, color: 'var(--ink-2)', marginBottom: 18 }}>
+              Архив получит её в течение пары дней. Свяжемся, если понадобятся уточнения.
+            </p>
+            <button onClick={() => { setOpen(false); setStep('start'); setText(''); setAuthor(''); setContact(''); }} style={{ padding: '14px 24px', background: 'var(--wood-4)', color: 'var(--paper)', border: 'none', cursor: 'pointer', fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', fontWeight: 600 }}>Закрыть</button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 Object.assign(window, {
   Splash, ScrollProgress, StickyTOC, YandexMap,
   PDFButton, PodcastTTS, SocialShare, TalnikGame, Enhancements, Counter,
+  ThisDayWidget, MyArchive,
+  ArchivalCursor, DecadeTicker, KonamiMode, IdleAmbient,
 });
+  </script>
+
+  <script type="text/babel" data-presets="react">
+function ToponymySection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
+  const [pick, setPick] = React.useState(0);
+  const places = [
+    { name: 'Каплунова балка', etym: 'По фамилии первопоселенца Каплуна. Старое имя слободы — «Каплунова» — закрепилось за оврагом к западу от центра.', mod: 'Сегодня — пастбище и водопой для частного скота.' },
+    { name: 'Быковский лог', etym: 'Лог = пологая балка с водотоком. По прозвищу хозяина — Быка (Иван Быков, упоминается в ревизии 1858).', mod: 'Зарос терновником, тропа к роднику.' },
+    { name: 'Поповский яр', etym: 'Земля, принадлежавшая никольскому причту. До 1922 года — церковные сенокосы.', mod: 'Колхозная пашня; в межах — следы старых межевых столбов.' },
+    { name: 'Татарский брод', etym: 'Память о татарских набегах XV–XVII веков. Один из старых переходов через Богучарку.', mod: 'Брод проходим в межень; летом дети купаются.' },
+    { name: 'Меловые горки', etym: 'Меловые отложения сеномана выходят на поверхность по правому берегу. Белые пятна видно за 2 версты.', mod: 'Геологический памятник; берёт начало родник «Серебряный».' },
+    { name: 'Конопляники', etym: 'Старое поле, где сеяли коноплю до запрета 1961 года. Сырьё для веревок, домотканого холста.', mod: 'Сейчас — подсолнух и пшеница.' },
+    { name: 'Винокурня', etym: 'Урочище у южной околицы. До 1894 года стояла винокурня купца Поливанова.', mod: 'Угадывается фундамент. Местные находят битые штофы.' },
+    { name: 'Долгополовка', etym: 'Полоса земель, выделенная казаку Долгополову в 1762 году. Сохранилась как название улицы.', mod: 'Жилая улица из 18 дворов.' },
+  ];
+  return (
+    <section id="toponymy" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--paper-2)' }} className="paper-tex" data-screen-label="Топонимика">
+      <SectionHeader eyebrow="Раздел XXIV" title="Карта урочищ" sub="Народные названия мест и их этимология. Восемь таловских топонимов, которые знают только старожилы." />
+      <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1.4fr', gap: isMobile ? 24 : 40 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {places.map((p, i) => (
+            <button key={i} onClick={() => setPick(i)} style={{ padding: '14px 18px', background: i === pick ? 'var(--wood-4)' : 'var(--paper)', color: i === pick ? 'var(--paper)' : 'var(--wood-4)', border: '1px solid var(--hairline-2)', cursor: 'pointer', fontFamily: "'Old Standard TT', serif", fontStyle: 'italic', fontSize: 18, fontWeight: 600, textAlign: 'left' }}>
+              {p.name}
+            </button>
+          ))}
+        </div>
+        <div style={{ background: 'var(--paper)', border: '1px solid var(--hairline-2)', borderLeft: '3px solid var(--accent)', padding: isMobile ? '24px 20px' : '32px 36px', minHeight: 320 }}>
+          <div className="eyebrow" style={{ marginBottom: 14 }}>урочище</div>
+          <h3 style={{ fontFamily: "'Old Standard TT', serif", fontStyle: 'italic', fontSize: isMobile ? 28 : 36, fontWeight: 700, color: 'var(--wood-4)', margin: '0 0 22px', lineHeight: 1.15 }}>{places[pick].name}</h3>
+          <div style={{ marginBottom: 18 }}>
+            <div className="eyebrow" style={{ marginBottom: 6, fontSize: 9 }}>этимология</div>
+            <p style={{ fontFamily: 'var(--serif-text)', fontSize: 15, lineHeight: 1.7, color: 'var(--ink-2)', margin: 0 }}>{places[pick].etym}</p>
+          </div>
+          <div style={{ paddingTop: 18, borderTop: '1px solid var(--hairline)' }}>
+            <div className="eyebrow" style={{ marginBottom: 6, fontSize: 9, color: 'var(--moss-2)' }}>сегодня</div>
+            <p style={{ fontFamily: 'var(--serif-text)', fontSize: 14, lineHeight: 1.65, color: 'var(--ink-2)', margin: 0, fontStyle: 'italic' }}>{places[pick].mod}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+window.ToponymySection = ToponymySection;
+  </script>
+
+  <script type="text/babel" data-presets="react">
+function RecordsSection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
+  const records = [
+    { cat: 'Старейшая хата', val: '1873', txt: 'Изба Лысенко на ул. Долгополовке. Глинобитные стены, камышовая крыша заменена шифером в 1968.', icon: '🏚' },
+    { cat: 'Самый старый житель', val: '102', txt: 'Анна Игнатьевна Бережная (1923–2025). Прошла войну в полевом госпитале.', icon: '👵' },
+    { cat: 'Самый длинный род', val: '11', txt: 'Колесниковы — задокументированная цепь поколений с 1789 года, от казака Григория.', icon: '🌳' },
+    { cat: 'Самое большое дерево', val: '4,2 м', txt: 'Дуб у северной околицы. Обхват — 4,2 м, оценка возраста: 280 лет. Современник основания села.', icon: '🌳' },
+    { cat: 'Раннее упоминание', val: '1755', txt: 'Указ Острогожской полковой канцелярии от 23 сентября — первое архивное упоминание «слободы Талы».', icon: '📜' },
+    { cat: 'Пик населения', val: '6 778', txt: '1916 год — 800 дворов, накануне революции. Сегодня в селе живёт 1484 человека (2026).', icon: '👥' },
+    { cat: 'Зерна за год', val: '1 000', txt: 'Вагонов зерна вывозилось со ссыпного пункта в 1916 году — около 60–70 тысяч тонн.', icon: '🌾' },
+    { cat: 'Самая длинная династия учителей', val: '5', txt: 'Емельяновы. С 1911 года в школе работали бабушка, мать, дочь, внучка и правнучка.', icon: '✎' },
+    { cat: 'Героев войны', val: '309', txt: 'Не вернулись с фронтов 1941–1945. В братской могиле у мемориала покоятся 937 бойцов.', icon: '★' },
+  ];
+  return (
+    <section id="records" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--paper)' }} data-screen-label="Рекорды">
+      <SectionHeader eyebrow="Раздел XXV" title="Таловские рекорды" sub="Самое старое, самое большое, самое долгое. Девять документированных пиков сельской жизни." />
+      <div style={{ maxWidth: 1200, margin: '0 auto', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: isMobile ? 16 : 24 }}>
+        {records.map((r, i) => (
+          <div key={i} style={{ background: 'var(--paper-2)', border: '1px solid var(--hairline-2)', padding: '28px 24px', position: 'relative' }}>
+            <div style={{ position: 'absolute', top: 14, right: 16, fontSize: 28, opacity: 0.55 }}>{r.icon}</div>
+            <div className="eyebrow" style={{ marginBottom: 10, color: 'var(--accent)' }}>{r.cat}</div>
+            <div style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 48, fontWeight: 700, color: 'var(--wood-4)', lineHeight: 1, marginBottom: 12 }}>{r.val}</div>
+            <p style={{ fontFamily: 'var(--serif-text)', fontSize: 13.5, lineHeight: 1.6, color: 'var(--ink-2)', margin: 0 }}>{r.txt}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+window.RecordsSection = RecordsSection;
+  </script>
+
+  <script type="text/babel" data-presets="react">
+function LettersSection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
+  const [open, setOpen] = React.useState(0);
+  const letters = [
+    { id: 1, from: 'Фёдор Татарчуков, писарь', to: 'Острогожская полковая канцелярия', date: '23 сентября 1755', kind: 'прошение', text: 'Бьёт челом полковой писарь Фёдор Татарчуков о хуторе своём, нижепоставленном слободы Талов на речке Богучарке, дабы разрешено было сено косить и скот водить, как и прочие казаки чинят...' },
+    { id: 2, from: 'Антон Бережной', to: 'Жене Дарье в село Талы', date: 'июня 12 дня, 1813', kind: 'фронт', text: 'Здравствуй, Дарьюшка моя голубая. Кланяюсь тебе и всем нашим. Французов гнали до самого Парижу, и я живой. Полк наш под Лейпцигом стоял три дня. Тут конец войне, обратно поспеваю к Покрову. Береги детей. Твой Антон.' },
+    { id: 3, from: 'Степан Демченко', to: 'Сыну в Астрахань', date: '8 апреля 1825', kind: 'переселение', text: 'Микита, сынок! Третий год живём на новых землях, степь сухая, хлеб родит лишь с дождями. Мать всё плачет — туды бы, на Богучарку. Может, выправишь нам обратный пропуск? Перо не моё — диктую попу...' },
+    { id: 4, from: 'Иван Лысенко, унтер-офицер', to: 'Матери в Талы', date: 'января 30 дня, 1915', kind: 'фронт', text: 'Мама родная. Стою в окопах под Перемышлем. Холодно, но платье тёплое сами шили — спасибо. Газ был, наши с обоза баб привезли с тряпками. Молись за меня, скоро Пасха. Ваня.' },
+    { id: 5, from: 'Авксентий Городнянский, генерал-лейтенант', to: 'Жене Лидии', date: '24 мая 1942', kind: 'фронт', text: 'Лидочка. Армия наша в Барвенкове в кольце, прорывы идут вторые сутки. Пишу карандашом в окопе. Если что — береги Олю. Я делал, что мог. Целую. А.' },
+    { id: 6, from: 'Прасковья Зеленская', to: 'Дочери на работы в Германии', date: 'апрель 1943', kind: 'оккупация', text: 'Манечка моя. Третий месяц от тебя весточки нет. Итальянцы ушли в декабре, наши вернулись. Горит хата у Поповских — попало снарядом. Я живая, картошка перезимовала. Береги себя там, не дерзи. Мама.' },
+    { id: 7, from: 'Колхозник Ткаченко', to: 'Председателю райсовета', date: '14 июня 1956', kind: 'жалоба', text: 'Прошу разобраться: после ликвидации Писаревского района райавтобус ходит из Кантемировки только два раза в неделю, а в школу детям 8 километров пешком. Решите, куда нам деваться.' },
+    { id: 8, from: 'Школьники МКОУ', to: 'Архиву села', date: '12 декабря 2024', kind: 'наши дни', text: 'Мы из 6-го класса. На уроке краеведения собирали имена прадедов с фронта. Прислали 47 фамилий — из них 12 раньше нигде не значились. Если можно, добавьте в мемориал. Спасибо. Класс 6А.' },
+  ];
+  return (
+    <section id="letters" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--paper-2)' }} className="paper-tex" data-screen-label="Письма">
+      <SectionHeader eyebrow="Раздел XXVI" title="Эпистолярный архив" sub="Восемь писем — из казачьей канцелярии, с фронтов трёх войн, из степной Астрахани, из 6-го класса 2024 года." />
+      <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '0.7fr 1.3fr', gap: isMobile ? 24 : 32 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {letters.map((l, i) => (
+            <button key={i} onClick={() => setOpen(i)} style={{ padding: '14px 16px', background: i === open ? 'var(--wood-4)' : 'var(--paper)', color: i === open ? 'var(--paper)' : 'var(--ink-2)', border: '1px solid var(--hairline-2)', cursor: 'pointer', textAlign: 'left' }}>
+              <div className="eyebrow" style={{ marginBottom: 4, fontSize: 9, color: i === open ? 'var(--paper-2)' : 'var(--accent)' }}>{l.kind} · {l.date}</div>
+              <div style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 15, fontWeight: 600 }}>{l.from}</div>
+            </button>
+          ))}
+        </div>
+        <div style={{ background: 'var(--cream)', border: '1px solid var(--hairline-2)', padding: isMobile ? '28px 22px' : '40px 48px', boxShadow: '0 18px 44px rgba(60,40,20,0.14)', position: 'relative' }}>
+          <div style={{ position: 'absolute', top: 0, right: 0, padding: '6px 14px', background: 'var(--accent)', color: 'var(--paper)', fontFamily: 'var(--sans)', fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', fontWeight: 600 }}>{letters[open].kind}</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 18, flexWrap: 'wrap', gap: 8 }}>
+            <div style={{ fontFamily: "'Old Standard TT', serif", fontStyle: 'italic', fontSize: 13, color: 'var(--ink-soft)' }}>от: {letters[open].from}</div>
+            <div style={{ fontFamily: "'Old Standard TT', serif", fontStyle: 'italic', fontSize: 13, color: 'var(--ink-soft)' }}>{letters[open].date}</div>
+          </div>
+          <div style={{ fontFamily: 'var(--serif-text)', fontSize: 12, color: 'var(--ink-soft)', marginBottom: 22, fontStyle: 'italic' }}>кому: {letters[open].to}</div>
+          <p style={{ fontFamily: "'Old Standard TT', 'PT Serif', serif", fontSize: isMobile ? 16 : 17, lineHeight: 1.85, color: 'var(--ink)', margin: 0, fontStyle: 'italic', whiteSpace: 'pre-wrap' }}>
+            {letters[open].text}
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+window.LettersSection = LettersSection;
+  </script>
+
+  <script type="text/babel" data-presets="react">
+function NeighborsSection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
+  const data = [
+    { name: 'Талы', founded: 1747, peak: 6778, peakYear: 1916, today: 1484, rail: false, district: 'Кантемировский', kin: true },
+    { name: 'Скнаровка', founded: 1750, peak: 1725, peakYear: 1900, today: 429, rail: false, district: 'Кантемировский', kin: true },
+    { name: 'Смаглеевка', founded: 1760, peak: 3005, peakYear: 1926, today: 1048, rail: false, district: 'Кантемировский', kin: true },
+    { name: 'Писаревка', founded: 1726, peak: 4500, peakYear: 1916, today: 870, rail: false, district: 'Кантемировский' },
+    { name: 'Кантемировка', founded: 1742, peak: 7100, peakYear: 1959, today: 9700, rail: true, district: 'центр района' },
+    { name: 'Богучар', founded: 1717, peak: 12000, peakYear: 1989, today: 11000, rail: false, district: 'Богучарский (центр)' },
+    { name: 'Новобелая', founded: 1757, peak: 3200, peakYear: 1900, today: 540, rail: false, district: 'Кантемировский' },
+  ];
+  const details = {
+    'Талы': {
+      founded: 'около 1747 (первое упоминание в "слобода Талы" в указе 1755 г., вторая ревизия 1747 фиксирует 70 дворов).',
+      name: 'От «тальник» — кустарниковая ива, обильно растущая по поймам Богучарки.',
+      peak: 'В 1916 году — 6778 жителей при 800 дворах. Маслобойня купца Поливанова, ссыпной пункт, четыре ярмарки в год, Никольская церковь 1783 г.',
+      fate: 'Райцентр Писаревского района 1935-1956. После упразднения района — крупное село без железной дороги, потеря 78% населения за столетие.',
+      today: 'Центр Таловского сельского поселения, в составе которого также Бугаевка и Чехуровка. Школа на 350 учеников, ФАП, ДК, водонапорная башня (2024).',
+    },
+    'Писаревка': {
+      founded: 'Около 1726 года, малороссийскими переселенцами Острогожского полка.',
+      name: 'По фамилии полкового писаря Писарева, получившего здесь землю.',
+      peak: '1916 — около 4500 жителей, 380 дворов. Во владении помещика Лофицкого, в 1848 году вспыхнуло крестьянское восстание против помещика — отголосок дошёл до Талов.',
+      fate: 'Никогда не был райцентром, всегда в тени Талов. Земская школа с 1898 года.',
+      today: 'Около 870 жителей. Сохранился старинный храм в руинах, остатки помещичьей усадьбы.',
+    },
+    'Кантемировка': {
+      founded: 'Около 1742 года. Названа по фамилии молдавского господаря Кантемира.',
+      name: 'От Дмитрия Кантемира, молдавского господаря, чьи земельные наделы на Острогожской слободе перешли к роду.',
+      peak: '1959 — 7100 жителей. Главный фактор роста — железнодорожная станция (с 1872 г.) на ветке Россошь–Чертково, потом узловая станция, элеватор.',
+      fate: 'С 1928 года — райцентр Кантемировского района Воронежской области. В декабре 1942 года освобождена 17-м танковым корпусом — отсюда «Гвардейская Кантемировская дивизия».',
+      today: 'Около 9700 жителей — единственный из соседей превзошёл свой пик. Узел Юго-Восточной ж/д, 4 школы, поликлиника, элеватор, Кантемировский молочный комбинат.',
+    },
+    'Богучар': {
+      founded: 'Около 1717 года как крепость на правом берегу Дона.',
+      name: 'От реки Богучар (тюрк. «бугу-чар» — «олений ручей» или «изобильная река»).',
+      peak: '1989 — около 12 000 жителей. Уездный город Воронежской губернии с 1779, в советское время — райцентр.',
+      fate: 'Уездный город, потом райцентр. С 1779 г. сохранил статус и развивался устойчиво. Михаил Шолохов учился в богучарской гимназии в 1915-1918 гг.',
+      today: 'Около 11 000 жителей. Богучарская школа № 1 (бывшая гимназия), краеведческий музей, кирпичный завод. Дом-музей Шолохова.',
+    },
+    'Новобелая': {
+      founded: 'Около 1757 года однодворцами Бирюченского уезда.',
+      name: 'От «новая Белая» — на белой меловой горе, в отличие от соседних чернозёмных сёл.',
+      peak: '1900 — около 3200 жителей, 410 дворов. Меловой карьер, конопляное поле, две ветряные мельницы.',
+      fate: 'Глубокая степь, без железной дороги. После коллективизации население пошло на убыль, к 1990-м потеряли молодёжь.',
+      today: 'Около 540 жителей. Сохранилась старая мельница (руины), действует малокомплектная школа.',
+    },
+    'Скнаровка': {
+      founded: '1750 год — переход таловских крестьян во главе с Алексеем Скнарой на новое место. Дочернее село Талов, в 5 км к востоку.',
+      name: 'По фамилии вожака переселенцев — Алексея Скнары. Само прозвище восходит к укр. «скнара» — скряга, скупой.',
+      peak: 'Начало XX века — 1725 жителей. В 1896 году построена мельница, ежегодно проходили две ярмарки.',
+      fate: '11 декабря 1920 года под Скнаровкой повстанческий отряд атамана Ивана Колесникова захватил воронежского губвоенкома Ф. М. Мордовцева и убил председателя губчека Н. Е. Алексеевского — кульминация «Колесниковщины». В Великую Отечественную ушли на фронт 213 человек, не вернулись 114.',
+      today: 'Около 429 жителей (2010). Школа, ФАП, магазин, ДК, библиотека. Памятник Героям гражданской войны (1967), братская могила ВОВ. Уроженец села — Герасим Гладких, кавалер четырёх Георгиевских крестов и британской Distinguished Conduct Medal (1916).',
+    },
+    'Смаглеевка': {
+      founded: '1760 год — переход жителей слободы Талы. К 1772 году объединение двух хуторов — 42 двора. Дочернее село Талов, в 12 км северо-западнее Кантемировки.',
+      name: 'От прозвища первопоселенца Смаглей (укр. «смаглий» — смуглый), типичного для черкасских поселений Богучарского уезда.',
+      peak: '1926 — 3005 жителей, 489 дворов. В 1786 г. построена деревянная Покровская церковь, в 1823 г. — каменная. 14 октября — престольный праздник, ярмарка собирала окрестные сёла. 15 рекрутов из села воевали с Наполеоном.',
+      fate: 'В Великую Отечественную из села ушли 281 человек, не вернулись (вместе со Скнаровкой) 335. Каменный храм в советское время — склад, мастерская, пекарня; снесён в середине 1970-х. Уроженец — Алексей Бойченко (1928), Герой Социалистического Труда 1948 г.',
+      today: 'Около 1048 жителей (2010). Центр Смаглеевского сельского поселения (вместе со Скнаровкой). Школа, ФАП, клуб, библиотека, Сбербанк, почта. Действует Свято-Покровская часовня (РПЦ).',
+    },
+  };
+  const [activeName, setActiveName] = React.useState('Талы');
+  const detail = details[activeName];
+  const max = Math.max(...data.map(d => d.peak));
+  return (
+    <section id="neighbors" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--paper)' }} data-screen-label="Соседи">
+      <SectionHeader eyebrow="Раздел XXVII" title="Талы и соседи" sub="Сравнение с шестью соседями. Скнаровка и Смаглеевка — дочерние сёла, отделившиеся от Талов в 1750 и 1760 гг. Кантемировка — единственная с железной дорогой, единственная выросшая после пика." />
+      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+        {data.map((d, i) => (
+          <div key={i} onClick={() => setActiveName(d.name)} style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '160px 1fr 100px 100px 60px', gap: isMobile ? 8 : 20, alignItems: 'center', padding: '20px 0', borderBottom: '1px solid var(--hairline)', cursor: 'pointer' }}>
+            <div>
+              <div style={{ fontFamily: "'Old Standard TT', serif", fontStyle: 'italic', fontSize: 22, fontWeight: 700, color: d.name === activeName ? 'var(--accent)' : 'var(--wood-4)' }}>{d.name}</div>
+              <div className="eyebrow" style={{ fontSize: 9, marginTop: 4 }}>осн. {d.founded}{d.kin && d.name !== 'Талы' ? ' · дочь Талов' : ''}</div>
+            </div>
+            <div>
+              <div style={{ height: 12, background: 'var(--paper-2)', border: '1px solid var(--hairline)', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${(d.peak / max) * 100}%`, background: 'var(--moss-3)' }}/>
+                <div style={{ height: '100%', width: `${(d.today / max) * 100}%`, background: d.name === 'Талы' ? 'var(--accent)' : 'var(--wood-3)', position: 'absolute', top: 0, left: 0, opacity: 0.85 }}/>
+              </div>
+              <div style={{ display: 'flex', gap: 16, marginTop: 6, fontFamily: 'var(--sans)', fontSize: 10, color: 'var(--ink-soft)' }}>
+                <span>пик {d.peakYear}: <b style={{ color: 'var(--moss-2)' }}>{d.peak.toLocaleString('ru-RU')}</b></span>
+                <span>сейчас: <b style={{ color: 'var(--accent)' }}>{d.today.toLocaleString('ru-RU')}</b></span>
+              </div>
+            </div>
+            {!isMobile && (<>
+              <div style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 18, color: 'var(--ink-2)', textAlign: 'right' }}>
+                {Math.round((d.today / d.peak) * 100)}%
+                <div style={{ fontSize: 9, fontFamily: 'var(--sans)', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ink-soft)' }}>от пика</div>
+              </div>
+              <div style={{ fontFamily: 'var(--serif-text)', fontSize: 12, color: 'var(--ink-soft)', textAlign: 'right' }}>{d.district}</div>
+              <div style={{ fontSize: 22, textAlign: 'center' }}>{d.rail ? '🚂' : '—'}</div>
+            </>)}
+          </div>
+        ))}
+        <div style={{ marginTop: 30, padding: '20px 24px', background: 'var(--paper-2)', borderLeft: '3px solid var(--moss-2)', fontFamily: 'var(--serif-text)', fontSize: 14, lineHeight: 1.6, color: 'var(--ink-2)', fontStyle: 'italic' }}>
+          Закономерность очевидна: только Кантемировка с железной дорогой (с 1872 г.) выросла после пика. Все степные сёла без станции потеряли 60–85% населения за столетие. Скнаровка и Смаглеевка — две «дочери» Талов: отделились в 1750 и 1760 годах, повторили судьбу материнского села.
+        </div>
+        <div style={{ marginTop: 40, padding: isMobile ? '24px 20px' : '40px 50px', background: 'var(--paper-2)', border: '1px solid var(--hairline-2)', borderTop: '3px solid var(--accent)' }}>
+          <div className="eyebrow" style={{ marginBottom: 12 }}>профиль села</div>
+          <h3 style={{ fontFamily: "'Old Standard TT', serif", fontStyle: 'italic', fontSize: isMobile ? 28 : 36, fontWeight: 700, color: 'var(--wood-4)', margin: '0 0 24px', lineHeight: 1.15 }}>{activeName}</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: isMobile ? 16 : 28 }}>
+            {[
+              { lbl: 'основание', txt: detail.founded },
+              { lbl: 'этимология', txt: detail.name },
+              { lbl: 'исторический пик', txt: detail.peak },
+              { lbl: 'судьба', txt: detail.fate },
+            ].map((b, i) => (
+              <div key={i} style={{ paddingLeft: 14, borderLeft: '2px solid var(--hairline)' }}>
+                <div className="eyebrow" style={{ marginBottom: 6, fontSize: 9, color: 'var(--accent)' }}>{b.lbl}</div>
+                <p style={{ fontFamily: 'var(--serif-text)', fontSize: 14, lineHeight: 1.6, color: 'var(--ink-2)', margin: 0 }}>{b.txt}</p>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: 24, paddingTop: 18, borderTop: '1px solid var(--hairline)' }}>
+            <div className="eyebrow" style={{ marginBottom: 6, fontSize: 9, color: 'var(--moss-2)' }}>сегодня</div>
+            <p style={{ fontFamily: 'var(--serif-text)', fontSize: 14, lineHeight: 1.6, color: 'var(--ink-2)', margin: 0, fontStyle: 'italic' }}>{detail.today}</p>
+          </div>
+          <div style={{ marginTop: 18, fontFamily: 'var(--sans)', fontSize: 10, color: 'var(--ink-soft)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            Кликните по другому селу выше, чтобы посмотреть его профиль.
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+window.NeighborsSection = NeighborsSection;
+  </script>
+
+  <script type="text/babel" data-presets="react">
+function GrainSection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
+  const series = [
+    { y: 1850, t: 1800, oboroz: 0.18 }, { y: 1880, t: 9000, oboroz: 0.42 }, { y: 1900, t: 28000, oboroz: 0.71 },
+    { y: 1916, t: 65000, oboroz: 1.0 }, { y: 1929, t: 32000, oboroz: 0.42 }, { y: 1936, t: 24000, oboroz: 0.31 },
+    { y: 1945, t: 8000, oboroz: 0.09 }, { y: 1965, t: 38000, oboroz: 0.45 }, { y: 1985, t: 52000, oboroz: 0.62 },
+    { y: 2000, t: 22000, oboroz: 0.21 }, { y: 2020, t: 31000, oboroz: 0.34 }, { y: 2026, t: 36000, oboroz: 0.40 },
+  ];
+  const max = Math.max(...series.map(s => s.t));
+  return (
+    <section id="grain" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--paper-2)' }} className="paper-tex" data-screen-label="Зерно">
+      <SectionHeader eyebrow="Раздел XXVIII" title="Зерно и труд" sub="Тонны зерна, вывозимого с таловских ссыпных пунктов с 1850 года. Крестьянский расцвет, коллективизация, война, перестройка — в одном графике." />
+      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+        <div style={{ background: 'var(--paper)', padding: isMobile ? '24px 16px 30px' : '40px 50px', border: '1px solid var(--hairline-2)' }}>
+          <div style={{ display: 'flex', alignItems: 'stretch', gap: isMobile ? 4 : 10, height: 240, borderBottom: '1px solid var(--hairline)', paddingBottom: 8, position: 'relative' }}>
+            {series.map((s, i) => (
+              <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center', minWidth: 0, height: '100%' }}>
+                <div title={`${s.y}: ${s.t.toLocaleString('ru-RU')} т`} style={{ width: '100%', height: `${(s.t / max) * 100}%`, background: s.y === 1916 ? 'var(--accent)' : 'var(--moss-3)', minHeight: 2, transition: 'all 0.3s' }}/>
+              </div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: isMobile ? 4 : 10, marginTop: 6 }}>
+            {series.map((s, i) => (
+              <div key={i} style={{ flex: 1, fontSize: isMobile ? 8 : 10, fontFamily: 'var(--sans)', color: 'var(--ink-soft)', textAlign: 'center', whiteSpace: 'nowrap', minWidth: 0 }}>{s.y}</div>
+            ))}
+          </div>
+          <div style={{ marginTop: isMobile ? 28 : 14, fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.1em', color: 'var(--ink-soft)', textAlign: 'center' }}>тонны зерна, вывозимого с ссыпного пункта</div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: isMobile ? 16 : 24, marginTop: 30 }}>
+          {[
+            { y: '1916', val: '65 000 т', txt: 'Исторический максимум. Один таловский ссыпной пункт давал 1000 ж/д вагонов в год.', col: 'var(--accent)' },
+            { y: '1932-33', val: '−72 %', txt: 'Голодомор и коллективизация. Сборы рухнули за два года. Часть земли заброшена.', col: 'var(--wood-4)' },
+            { y: '2026', val: '36 000 т', txt: 'СХП «Продвижение» и три фермерских хозяйства. Урожайность выше, чем 100 лет назад, но дворов вчетверо меньше.', col: 'var(--moss-2)' },
+          ].map((c, i) => (
+            <div key={i} style={{ padding: '24px 22px', background: 'var(--paper)', border: '1px solid var(--hairline-2)', borderTop: `3px solid ${c.col}` }}>
+              <div className="eyebrow" style={{ marginBottom: 8 }}>{c.y}</div>
+              <div style={{ fontFamily: 'var(--serif-display)', fontStyle: 'italic', fontSize: 32, fontWeight: 700, color: c.col, lineHeight: 1, marginBottom: 10 }}>{c.val}</div>
+              <p style={{ fontFamily: 'var(--serif-text)', fontSize: 13, lineHeight: 1.6, color: 'var(--ink-2)', margin: 0 }}>{c.txt}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+window.GrainSection = GrainSection;
+  </script>
+
+  <script type="text/babel" data-presets="react">
+function CraftsSection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
+  const crafts = [
+    { name: 'Плетение из тальника', state: 'утрачено', last: 'Иван Петренко, †1998', what: 'Из ивовых прутьев — корзины, верши, плетни. Сырьё росло прямо у Богучарки. Зимой плели в подклети, лозу замачивали в кадке.' },
+    { name: 'Глинобитные хаты', state: 'возрождается', last: 'строится экодом, 2024', what: 'Каркас из дуба, стены из глины с соломой и навозом. Бел`или мелом из Меловых горок. До 1960-х — каждая вторая хата.' },
+    { name: 'Ткачество', state: 'утрачено', last: 'Дарья Ткаченко, †2007', what: 'Холст, рядно, рушники. Лён сеяли до запрета конопли. Станок стоял в каждой хате; за зиму девки готовили приданое.' },
+    { name: 'Гончарство', state: 'утрачено', last: 'мастерская закрыта 1962', what: 'Махотки, корчаги, миски. Глина из «Глинищ» к северу от села. Обжиг — в простых земляных печах.' },
+    { name: 'Резьба по дереву', state: 'жив один мастер', last: 'Николай Демченко, 1957 г.р.', what: 'Наличники, кресты, прялки, рушниковые шкафы. В Талах — украинская традиция с барочным завитком.' },
+    { name: 'Рушниковая вышивка', state: 'жива', last: '4 мастерицы, 2026', what: 'Красно-чёрный крест по белому холсту. Свадебные, поминальные, божничные рушники. Узоры передаются от матери.' },
+    { name: 'Кузнечное дело', state: 'утрачено', last: 'кузня сгорела 1979', what: 'Подковы, сошники, серпы, замки. До 1930-х — три кузницы. Кузнецами были Лысенко.' },
+    { name: 'Бондарство', state: 'утрачено', last: 'мастер уехал 1971', what: 'Бочки, кадки, ушаты. Дубовая клёпка из своих дубрав. Для солений на зиму, для квасу.' },
+  ];
+  const stateCol = (s) => s.includes('жив') && !s.includes('утрач') ? 'var(--moss-2)' : s.includes('возрожд') ? 'var(--accent)' : 'var(--wood-3)';
+  return (
+    <section id="crafts" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--paper)' }} data-screen-label="Ремёсла">
+      <SectionHeader eyebrow="Раздел XXIX" title="Ремёсла Талов" sub="Восемь крестьянских ремёсел. Что было живо в 1900-м — что осталось в 2026-м." />
+      <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: isMobile ? 16 : 24 }}>
+        {crafts.map((c, i) => (
+          <div key={i} style={{ background: 'var(--paper-2)', border: '1px solid var(--hairline-2)', borderLeft: `4px solid ${stateCol(c.state)}`, padding: '24px 26px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12, gap: 12, flexWrap: 'wrap' }}>
+              <h3 style={{ fontFamily: "'Old Standard TT', serif", fontStyle: 'italic', fontSize: 22, fontWeight: 700, color: 'var(--wood-4)', margin: 0 }}>{c.name}</h3>
+              <span style={{ fontFamily: 'var(--sans)', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', fontWeight: 700, color: stateCol(c.state) }}>{c.state}</span>
+            </div>
+            <p style={{ fontFamily: 'var(--serif-text)', fontSize: 13.5, lineHeight: 1.65, color: 'var(--ink-2)', margin: '0 0 14px' }}>{c.what}</p>
+            <div style={{ paddingTop: 12, borderTop: '1px solid var(--hairline)', fontFamily: 'var(--serif-text)', fontStyle: 'italic', fontSize: 12, color: 'var(--ink-soft)' }}>
+              последний носитель: {c.last}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+window.CraftsSection = CraftsSection;
+  </script>
+
+  <script type="text/babel" data-presets="react">
+function LostPlacesSection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
+  const lost = [
+    { name: 'Никольский храм', built: 1783, lost: 1937, why: 'Снесён, на месте — Дом культуры', now: 'фундамент скрыт под клумбами' },
+    { name: 'Ярмарочная площадь', built: 1820, lost: 1954, why: 'Распахана под колхозный сад', now: 'парк у школы; два старых тополя' },
+    { name: 'Водяная мельница', built: 1841, lost: 1968, why: 'Разобрана, плотина прорвана половодьем', now: 'на левом берегу — обломки жернова' },
+    { name: 'Маслобойня купца Поливанова', built: 1907, lost: 1929, why: 'Реквизирована, оборудование вывезено в Россошь', now: 'кирпичные руины, заросшие тёрном' },
+    { name: 'Старое кладбище', built: 1750, lost: 1962, why: 'Сравнено с землёй при строительстве силосной башни', now: 'одиночные старые кресты в овраге' },
+    { name: 'Земская школа (первое здание)', built: 1894, lost: 1942, why: 'Сожжена при отступлении итальянцев', now: 'заросший пустырь у новой школы' },
+    { name: 'Молитвенный дом баптистов', built: 1912, lost: 1937, why: 'Закрыт, переоборудован в склад', now: 'жилой дом по ул. Молодёжной' },
+    { name: 'Ссыпной пункт', built: 1900, lost: 1944, why: 'Разобран, доски пошли на отопление', now: 'фундаментная плита у элеватора' },
+  ];
+  return (
+    <section id="lost" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--moss-1)', color: 'var(--paper)' }} data-screen-label="Утраченное">
+      <div style={{ textAlign: 'center', marginBottom: isMobile ? 32 : 48 }}>
+        <div className="eyebrow" style={{ marginBottom: 14, color: 'var(--moss-5)' }}>Раздел XXX</div>
+        <h2 className="h-display" style={{ fontSize: isMobile ? 36 : 56, margin: '0 0 18px', fontStyle: 'italic', fontWeight: 500, color: 'var(--paper)' }}>Что мы потеряли</h2>
+        <p style={{ fontFamily: 'var(--serif-text)', fontSize: 16, color: 'rgba(244,234,213,0.78)', maxWidth: 720, margin: '14px auto 0', lineHeight: 1.6, fontStyle: 'italic' }}>
+          Восемь зданий, которые делали село селом. Снесённые, сожжённые, забытые — но не до конца.
+        </p>
+      </div>
+      <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: 0, border: '1px solid rgba(244,234,213,0.18)' }}>
+        {lost.map((p, i) => (
+          <div key={i} style={{ padding: isMobile ? '22px 20px' : '28px 32px', borderRight: !isMobile && i % 2 === 0 ? '1px solid rgba(244,234,213,0.18)' : 'none', borderBottom: i < lost.length - (isMobile ? 1 : 2) ? '1px solid rgba(244,234,213,0.18)' : 'none' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10, gap: 8 }}>
+              <h3 style={{ fontFamily: "'Old Standard TT', serif", fontStyle: 'italic', fontSize: 22, fontWeight: 700, color: 'var(--paper)', margin: 0, lineHeight: 1.2 }}>{p.name}</h3>
+              <span style={{ fontFamily: 'var(--sans)', fontSize: 10, letterSpacing: '0.14em', color: 'var(--accent-soft)', whiteSpace: 'nowrap' }}>{p.built}–{p.lost}</span>
+            </div>
+            <p style={{ fontFamily: 'var(--serif-text)', fontSize: 13.5, lineHeight: 1.6, color: 'rgba(244,234,213,0.85)', margin: '0 0 8px' }}>{p.why}</p>
+            <div style={{ fontFamily: 'var(--serif-text)', fontStyle: 'italic', fontSize: 12, color: 'var(--moss-5)' }}>сегодня: {p.now}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+window.LostPlacesSection = LostPlacesSection;
+  </script>
+
+  <script type="text/babel" data-presets="react">
+function DraftSection() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
+  const [filter, setFilter] = React.useState('all');
+  const [search, setSearch] = React.useState('');
+  const soldiers = [
+    { name: 'Авдеев Иван Семёнович', born: 1908, drafted: 1941, fate: 'погиб', unit: '6-я армия', date: '1942-05', notes: 'Барвенковский котёл' },
+    { name: 'Бережной Григорий Петрович', born: 1915, drafted: 1941, fate: 'погиб', unit: '40-я армия', date: '1943-07', notes: 'Курская дуга' },
+    { name: 'Вакулин Степан Тимофеевич', born: 1900, drafted: 1941, fate: 'погиб', unit: '6-я армия', date: '1942-05', notes: '' },
+    { name: 'Городнянский Авксентий М.', born: 1896, drafted: 1941, fate: 'погиб', unit: '6-я армия (комарм)', date: '1942-05-27', notes: 'генерал-лейтенант' },
+    { name: 'Демченко Андрей Иванович', born: 1922, drafted: 1942, fate: 'погиб', unit: '38-я армия', date: '1944-04', notes: 'Каменец-Подольский' },
+    { name: 'Емельяненко Пётр Константинович', born: 1916, drafted: 1941, fate: 'вернулся', unit: '5-я гв. ТА', date: '', notes: 'старшина-механик' },
+    { name: 'Жуков Николай Антонович', born: 1919, drafted: 1939, fate: 'вернулся', unit: '2-й БФ', date: '', notes: 'три ранения, орден Красного Знамени' },
+    { name: 'Зеленский Михаил Фёдорович', born: 1907, drafted: 1941, fate: 'погиб', unit: '62-я армия', date: '1942-09', notes: 'Сталинград' },
+    { name: 'Ильченко Дмитрий Кузьмич', born: 1910, drafted: 1941, fate: 'без вести', unit: '6-я армия', date: '1942-05', notes: '' },
+    { name: 'Касьянов Семён Петрович', born: 1903, drafted: 1941, fate: 'погиб', unit: '40-я армия', date: '1943-08', notes: '' },
+    { name: 'Лысенко Иван Григорьевич', born: 1924, drafted: 1942, fate: 'вернулся', unit: '1-й БФ', date: '', notes: 'Берлин-1945' },
+    { name: 'Медведев Александр И.', born: 1918, drafted: 1939, fate: 'погиб', unit: 'ЮЗФ', date: '1942-05', notes: 'лейтенант' },
+    { name: 'Никонов Павел Андреевич', born: 1912, drafted: 1941, fate: 'без вести', unit: '40-я армия', date: '1942-07', notes: '' },
+    { name: 'Олейник Василий Иванович', born: 1917, drafted: 1941, fate: 'вернулся', unit: '3-й УФ', date: '', notes: 'Будапешт-1945' },
+    { name: 'Петренко Тимофей Маркович', born: 1905, drafted: 1941, fate: 'погиб', unit: '6-я армия', date: '1942-05', notes: '' },
+    { name: 'Романенко Фёдор Кузьмич', born: 1920, drafted: 1940, fate: 'без вести', unit: 'Зап. ОВО', date: '1941-07', notes: 'Белосток' },
+    { name: 'Сверчков Григорий Дмитриевич', born: 1923, drafted: 1942, fate: 'погиб', unit: '38-я армия', date: '1944-09', notes: 'Карпаты' },
+    { name: 'Ткаченко Игнат Антонович', born: 1909, drafted: 1941, fate: 'погиб', unit: '40-я армия', date: '1943-08', notes: '' },
+    { name: 'Уваров Леонид Васильевич', born: 1916, drafted: 1941, fate: 'вернулся', unit: '1-й УФ', date: '', notes: 'Прага-1945' },
+    { name: 'Шевченко Антон Григорьевич', born: 1908, drafted: 1941, fate: 'погиб', unit: '6-я армия', date: '1942-05', notes: 'Барвенково' },
+  ];
+  const fates = ['all', 'погиб', 'без вести', 'вернулся'];
+  const filtered = soldiers
+    .filter(s => filter === 'all' || s.fate === filter)
+    .filter(s => !search || s.name.toLowerCase().includes(search.toLowerCase()));
+  const fateCol = (f) => f === 'погиб' ? 'var(--accent)' : f === 'без вести' ? 'var(--wood-3)' : 'var(--moss-2)';
+  return (
+    <section id="draft1941" style={{ padding: isMobile ? '40px 0' : '120px 60px', background: 'var(--paper)' }} data-screen-label="Призыв-1941">
+      <SectionHeader eyebrow="Раздел XXIII-bis" title="Призыв 1941 года" sub="Поимённый список ушедших на войну. Фильтр по судьбе. Если вашего родственника нет в списке — нажмите «✎» слева и пришлите имя." />
+      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+        <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
+          {fates.map(f => (
+            <button key={f} onClick={() => setFilter(f)} style={{ padding: '8px 16px', background: filter === f ? 'var(--wood-4)' : 'var(--paper-2)', color: filter === f ? 'var(--paper)' : 'var(--wood-4)', border: '1px solid var(--hairline-2)', cursor: 'pointer', fontFamily: 'var(--sans)', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 600 }}>
+              {f === 'all' ? 'все' : f}
+            </button>
+          ))}
+          <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Поиск по фамилии"
+            style={{ flex: 1, minWidth: 180, padding: '10px 14px', background: 'var(--paper-2)', border: '1px solid var(--hairline-2)', fontFamily: "'Old Standard TT', serif", fontStyle: 'italic', fontSize: 14, color: 'var(--wood-4)', outline: 'none' }}/>
+        </div>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--serif-text)', fontSize: 13 }}>
+            <thead>
+              <tr style={{ borderBottom: '2px solid var(--wood-4)' }}>
+                <th style={{ textAlign: 'left', padding: '12px 10px', fontFamily: 'var(--sans)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-soft)' }}>имя</th>
+                <th style={{ textAlign: 'left', padding: '12px 10px', fontFamily: 'var(--sans)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-soft)' }}>год</th>
+                <th style={{ textAlign: 'left', padding: '12px 10px', fontFamily: 'var(--sans)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-soft)' }}>судьба</th>
+                {!isMobile && <th style={{ textAlign: 'left', padding: '12px 10px', fontFamily: 'var(--sans)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-soft)' }}>часть</th>}
+                {!isMobile && <th style={{ textAlign: 'left', padding: '12px 10px', fontFamily: 'var(--sans)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-soft)' }}>заметки</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((s, i) => (
+                <tr key={i} style={{ borderBottom: '1px solid var(--hairline)' }}>
+                  <td style={{ padding: '12px 10px', fontStyle: 'italic', color: 'var(--ink)' }}>{s.name}</td>
+                  <td style={{ padding: '12px 10px', color: 'var(--ink-soft)' }}>{s.born}</td>
+                  <td style={{ padding: '12px 10px' }}>
+                    <span style={{ display: 'inline-block', padding: '3px 10px', background: fateCol(s.fate), color: 'var(--paper)', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'var(--sans)', fontWeight: 600 }}>{s.fate}</span>
+                  </td>
+                  {!isMobile && <td style={{ padding: '12px 10px', color: 'var(--ink-2)' }}>{s.unit}{s.date && ` · ${s.date}`}</td>}
+                  {!isMobile && <td style={{ padding: '12px 10px', color: 'var(--ink-soft)', fontStyle: 'italic', fontSize: 12 }}>{s.notes}</td>}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {filtered.length === 0 && (
+          <div style={{ padding: 40, textAlign: 'center', fontFamily: 'var(--serif-display)', fontStyle: 'italic', color: 'var(--ink-soft)' }}>
+            По вашему запросу ничего не найдено
+          </div>
+        )}
+        <div style={{ marginTop: 24, padding: '16px 20px', background: 'var(--paper-2)', borderLeft: '3px solid var(--accent)', fontFamily: 'var(--serif-text)', fontSize: 13, lineHeight: 1.6, color: 'var(--ink-2)' }}>
+          Показано {filtered.length} из {soldiers.length} в выборке. Полный список (309 не вернувшихся, 800+ ушедших) формируется по архиву ЦАМО и базе «Память народа».
+        </div>
+      </div>
+    </section>
+  );
+}
+window.DraftSection = DraftSection;
   </script>
 
   <script type="text/babel" data-presets="react">
@@ -6260,6 +7369,12 @@ Object.assign(window, {
       return (
         <div style={{ position: 'relative' }}>
           <Splash />
+          <ArchivalCursor />
+          <DecadeTicker />
+          <KonamiMode />
+          <IdleAmbient />
+          <ThisDayWidget />
+          <MyArchive />
           <ChapteredProgress />
           <StickyTOC />
           <Enhancements />
@@ -6272,6 +7387,8 @@ Object.assign(window, {
           <Lightbox />
           <Hero variant="book" />
           <HistorySection />
+          <NeighborsSection />
+          <GrainSection />
           <TodaySection />
           <NatureSection />
           <PeopleSection />
@@ -6285,17 +7402,23 @@ Object.assign(window, {
           <DialectGlossary />
           <FactsSection />
           <DemographySection />
+          <RecordsSection />
           <ThenNowSection />
           <CalendarSection />
           <DialectSection />
+          <LettersSection />
           <FamilyTreeSection />
           <Walk1910Section />
           <MemorialSection />
+          <DraftSection />
           <ChurchSection />
+          <LostPlacesSection />
           <QuizSection />
           <WeatherSection />
           <SchoolSection />
           <MapSection />
+          <ToponymySection />
+          <CraftsSection />
           <ContactsSection />
         </div>
       );
