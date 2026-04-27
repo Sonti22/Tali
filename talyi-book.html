@@ -274,12 +274,9 @@ html, body {
 <script>
 (function() {
   const TWEAKS = /*EDITMODE-BEGIN*/{"theme":"paper"}/*EDITMODE-END*/;
-  /* auto-night по системной теме, если юзер не выбирал руками */
+  /* default — paper (газета). Сохранённая тема применяется только если юзер сам её выбирал. */
   const saved = localStorage.getItem('taly-theme');
-  let theme = saved || TWEAKS.theme;
-  if (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    theme = 'night';
-  }
+  const theme = saved || TWEAKS.theme || 'paper';
   document.documentElement.setAttribute('data-theme', theme);
   window.__TWEAKS__ = { theme };
 
@@ -297,18 +294,14 @@ html, body {
     });
   }
 
-  /* восстановление скролла после возврата */
+  /* всегда стартуем с верха страницы, не восстанавливаем скролл */
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-  window.addEventListener('beforeunload', () => {
-    try { localStorage.setItem('taly-scroll', String(window.scrollY)); } catch {}
-  });
+  /* убрать старый ключ скролла из localStorage если был */
+  try { localStorage.removeItem('taly-scroll'); } catch {}
   window.addEventListener('load', () => {
-    try {
-      const y = parseInt(localStorage.getItem('taly-scroll') || '0', 10);
-      if (y > 200 && !location.hash) {
-        setTimeout(() => window.scrollTo({ top: y, behavior: 'instant' }), 800);
-      }
-    } catch {}
+    if (!location.hash) {
+      window.scrollTo(0, 0);
+    }
   });
 })();
 </script>
@@ -6640,7 +6633,7 @@ function OnboardingTour() {
   const [showed, setShowed] = React.useState(false);
   React.useEffect(() => {
     if (showed) return;
-    const seen = localStorage.getItem('taly-tour-v2');
+    const seen = localStorage.getItem('taly-tour-v3');
     if (seen) return;
     const t = setTimeout(() => { setStep(0); setShowed(true); }, 2200);
     return () => clearTimeout(t);
@@ -6661,7 +6654,7 @@ function OnboardingTour() {
     { ico: '🥚', t: 'Пасхальное яйцо', x: 'Введите код Konami: ↑↑↓↓←→←→ B A — активирует «режим 1865 года». Найдите 10 веточек тальника на сайте — откроется секретный архив.' },
   ];
   const close = (dontShow = true) => {
-    if (dontShow) localStorage.setItem('taly-tour-v2', '1');
+    if (dontShow) localStorage.setItem('taly-tour-v3', '1');
     setStep(-1);
   };
   if (step < 0) return null;
