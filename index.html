@@ -2151,7 +2151,43 @@ img[data-lqip]:not(.loaded) {
   white-space: nowrap;
   border: 0;
 }
+
+/* V3: Hand-drawn ink reveal — accent line under h-display when in view */
+@supports (animation-timeline: view()) {
+  h2.h-display, h3.h-display {
+    position: relative;
+  }
+  h2.h-display::after, h3.h-display::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -8px;
+    width: 60px;
+    height: 2px;
+    background: var(--accent);
+    transform-origin: left;
+    animation: inkDraw linear forwards;
+    animation-timeline: view();
+    animation-range: entry 10% cover 30%;
+  }
+  @keyframes inkDraw {
+    from { transform: scaleX(0); opacity: 0; }
+    to   { transform: scaleX(1); opacity: 0.8; }
+  }
+}
 </style>
+<script type="speculationrules">
+{
+  "prerender": [{
+    "where": { "and": [{ "href_matches": "/Tali/*" }, { "not": { "href_matches": "/Tali/api/*" } }] },
+    "eagerness": "moderate"
+  }],
+  "prefetch": [{
+    "where": { "href_matches": "/*" },
+    "eagerness": "conservative"
+  }]
+}
+</script>
 </head>
 <body>
   <a href="#history" class="skip-link">Перейти к содержанию</a>
@@ -4184,7 +4220,7 @@ function HistorySection() {
     year: '1848',
     img: 'images/tl-13-1848.jpg',
     title: 'Бунт у соседей',
-    text: 'В 30 верстах от Талов в Писаревке — восстание крепостных против помещика Лофицкого. Подавление длилось три недели; более 1000 человек подверглись порке.'
+    text: 'В 30 верстах от Талов в Писаревке — восстание крепостных против помещика Бедряги. Подавление длилось три недели; более 1000 человек подверглись порке.'
   }, {
     year: '1900',
     img: 'images/tl-14-1900.jpg',
@@ -4970,7 +5006,7 @@ const CHAPTERS = [{
   roman: 'VI',
   title: 'XIX век: войны, голод и земельный вопрос',
   sub: '1812 — 1900',
-  paras: ['Под звон колоколов Никольской церкви в 1812 году на битву с французами было отправлено 29 рекрутов. Для слободы в несколько сотен дворов — серьёзная потеря. Но важнее сам факт: Никольская церковь уже тогда была символом общины.', 'В 1821 году жители попросили разрешения переселиться на новые земли в Астраханскую губернию. В 1823 году туда выехала 61 семья — около 300–400 человек, 5–7 % населения. Указом от 10 апреля 1822 года были запущены первые волны организованной колонизации; в 1823 г. началось практическое переселение. Таловцы стали частью первой государственной программы переселения в России.', 'В 30 верстах от Талов — Писаревка, имение Бедрягов, где жили 2000 крепостных под управлением Лофицкого. Из мемуаров А. В. Никитенко: торговали людьми и дворяне, и мещане, и зажиточные крестьяне, записывая крепостных на имя чиновника-покровителя. 8 июня 1848 года крестьяне Писаревки собрались на площади у церкви, вызвали Лофицкого, избили его до полусмерти и прогнали. Восстание подавлено только 30 июня; губернатор лично командовал карательной экспедицией; более 1000 человек подверглись жестокой порке. В Талах это видели и слышали.', 'Отмена крепостного права коснулась таловцев косвенно — через перераспределение земли. После реформы они получили подтверждение прав на свои наделы. В 1870 году земство открыло в селе фельдшерский пункт, в 1894-м — земскую школу на 32 ученика. В селе была и приходская школа. Четыре ярмарки в год — один из лучших показателей в уезде, традиция полковых времён.'],
+  paras: ['Под звон колоколов Никольской церкви в 1812 году на битву с французами было отправлено 29 рекрутов. Для слободы в несколько сотен дворов — серьёзная потеря. Но важнее сам факт: Никольская церковь уже тогда была символом общины.', 'В 1821 году жители попросили разрешения переселиться на новые земли в Астраханскую губернию. В 1823 году туда выехала 61 семья — около 300–400 человек, 5–7 % населения. Указом от 10 апреля 1822 года были запущены первые волны организованной колонизации; в 1823 г. началось практическое переселение. Таловцы стали частью первой государственной программы переселения в России.', 'В 30 верстах от Талов — Писаревка, имение Бедряги, где жили 1599 крепостных. Из мемуаров А. В. Никитенко: торговали людьми и дворяне, и мещане, и зажиточные крестьяне, записывая крепостных на имя чиновника-покровителя. 8 июня 1848 года крестьяне Писаревки собрались на площади у церкви, вызвали управляющего Бедряги, избили его и убили в ходе восстания. Восстание подавлено только 30 июня; губернатор лично командовал карательной экспедицией; более 1000 человек подверглись жестокой порке, 4 руководителя преданы военному суду. В Талах это видели и слышали.', 'Отмена крепостного права коснулась таловцев косвенно — через перераспределение земли. После реформы они получили подтверждение прав на свои наделы. В 1870 году земство открыло в селе фельдшерский пункт, в 1894-м — земскую школу на 32 ученика. В селе была и приходская школа. Четыре ярмарки в год — один из лучших показателей в уезде, традиция полковых времён.'],
   pull: '«Людей продавали и покупали оптом и в розницу, как быков и баранов» — А. В. Никитенко, 1811',
   meta: [{
     v: '1812',
@@ -5129,9 +5165,24 @@ function Chapter({
     className: "eyebrow",
     style: {
       marginBottom: 8,
-      color: 'var(--accent)'
+      color: 'var(--accent)',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 12,
+      flexWrap: 'wrap'
     }
-  }, `Глава ${ch.roman} · ${ch.sub}`), /*#__PURE__*/React.createElement("h3", {
+  }, /*#__PURE__*/React.createElement("span", null, `Глава ${ch.roman} · ${ch.sub}`), /*#__PURE__*/React.createElement("span", {
+    "aria-label": `время чтения ${Math.max(1, Math.ceil((ch.paras || []).join(' ').split(' ').length / 200))} минут`,
+    style: {
+      fontFamily: 'var(--sans)',
+      fontSize: 9,
+      padding: '2px 8px',
+      background: 'var(--paper-2)',
+      color: 'var(--ink-soft)',
+      borderRadius: 0,
+      border: '1px solid var(--hairline)'
+    }
+  }, Math.max(1, Math.ceil((ch.paras || []).join(' ').split(' ').length / 200)), " \u043C\u0438\u043D \u0447\u0442\u0435\u043D\u0438\u044F")), /*#__PURE__*/React.createElement("h3", {
     style: {
       fontFamily: 'var(--serif-display)',
       fontSize: 36,
@@ -6250,6 +6301,34 @@ function PeopleSection() {
     img: 'Танкисты 17-го корпуса у Т-34, 1942',
     src: 'images/t34-tankers-1942.jpg',
     text: 'Бойцы 67-й танковой и 31-й мотострелковой бригад 17-го танкового корпуса (после декабря 1942 — 4-й гвардейский Кантемировский корпус). 937 из них покоятся в братской могиле в центре села; имена 110 до сих пор неизвестны.'
+  }, {
+    name: 'Кузьма Викторович Шпак',
+    years: '1918 — 10 апреля 1944',
+    role: 'Герой Советского Союза, десантник Ольшанского',
+    img: 'Старшина 1-й статьи К. В. Шпак',
+    src: 'images/people/placeholder.jpg',
+    text: 'Уроженец Писаревки (соседнее село, 5 км от Талов). Старшина 1-й статьи, замкомотделения автоматчиков 384-го отдельного батальона морской пехоты. Участник десанта Ольшанского в Николаеве 26 марта 1944 г.: 68 десантников 2 дня держали порт против немцев. Умер в госпитале 10 апреля 1944 от ран и отравления газом. Звание ГСС присвоено посмертно 20 апреля 1945 г.'
+  }, {
+    name: 'Никита Васильевич Никитченко',
+    years: '1903 — 26 июня 1944',
+    role: 'Герой Советского Союза',
+    img: 'Сапёр Н. В. Никитченко',
+    src: 'images/people/placeholder.jpg',
+    text: 'Уроженец Новобелой (35 км от Талов, тот же Кантемировский район). Сапёр 42-го отдельного штурмового инженерно-сапёрного батальона. 26 июня 1944 г. у деревни Погостище Псковского района бросился под немецкий танк с двумя противотанковыми минами и подорвал его. Звание ГСС присвоено посмертно 24 марта 1945 г., орден Ленина. Бюст в Новобелой.'
+  }, {
+    name: 'Анна Тихоновна Покрашенко',
+    years: '1928 — 1998',
+    role: 'Герой Социалистического Труда',
+    img: 'Свинарка А. Т. Покрашенко',
+    src: 'images/people/placeholder.jpg',
+    text: 'Уроженка Писаревки. Свинарка Писаревского совхоза. Получила звание ГСТ за многолетние выдающиеся показатели в животноводстве. Одна из первых женщин региона удостоенных высшего трудового отличия СССР.'
+  }, {
+    name: 'Анна Ефимовна Рубан',
+    years: 'род. 1942',
+    role: 'Полный кавалер ордена Трудовой Славы',
+    img: 'А. Е. Рубан, орденские знаки',
+    src: 'images/people/placeholder.jpg',
+    text: 'Уроженка/жительница Касьяновки (соседнее село на Богучарке). Имеет все три степени ордена Трудовой Славы — высшее трудовое отличие в позднесоветское время.'
   }];
   return /*#__PURE__*/React.createElement("section", {
     id: "people",
@@ -16164,7 +16243,7 @@ function ThisDayWidget() {
   }, {
     md: 608,
     year: 1848,
-    txt: 'В соседней Писаревке вспыхнуло восстание против помещика Лофицкого. В Талах слышали и видели.'
+    txt: 'В соседней Писаревке вспыхнуло восстание против помещика Бедряги. В Талах слышали и видели.'
   }, {
     md: 126,
     year: 1943,
@@ -16177,6 +16256,10 @@ function ThisDayWidget() {
     md: 106,
     year: 1943,
     txt: 'В Талах, в штабе 3-й танковой армии, маршалы Жуков и Василевский начали подготовку Острогожско-Россошанской операции.'
+  }, {
+    md: 326,
+    year: 1894,
+    txt: 'На станции Митрофановка (40 км от Талов) проездом к В. Г. Черткову останавливался Лев Толстой. Провёл у Чертковых неделю. На вокзале — мемориальная доска.'
   }];
   // pick closest event by md
   let pick = events[0];
@@ -16540,6 +16623,176 @@ function MyArchive() {
     }
   }, "\u0417\u0430\u043A\u0440\u044B\u0442\u044C"))));
 }
+function MemorialCandle() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
+  const [count, setCount] = React.useState(() => {
+    const saved = parseInt(localStorage.getItem('taly-candles-count') || '0', 10);
+    return isNaN(saved) ? 0 : saved;
+  });
+  const [lit, setLit] = React.useState(() => localStorage.getItem('taly-candle-lit') === '1');
+  const light = () => {
+    if (lit) return;
+    setLit(true);
+    setCount(c => {
+      const newCount = c + 1;
+      localStorage.setItem('taly-candles-count', String(newCount));
+      return newCount;
+    });
+    localStorage.setItem('taly-candle-lit', '1');
+  };
+  // mount only when MemorialSection visible
+  const [visible, setVisible] = React.useState(false);
+  React.useEffect(() => {
+    const sec = document.getElementById('memorial');
+    if (!sec) return;
+    const obs = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), {
+      threshold: 0.2
+    });
+    obs.observe(sec);
+    return () => obs.disconnect();
+  }, []);
+  if (!visible) return null;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: 'fixed',
+      right: isMobile ? 16 : 20,
+      bottom: isMobile ? 90 : 90,
+      zIndex: 95,
+      background: 'rgba(45, 58, 36, 0.96)',
+      color: 'var(--paper)',
+      padding: '14px 18px',
+      borderLeft: '3px solid var(--accent)',
+      boxShadow: '0 12px 30px rgba(0,0,0,0.3)',
+      maxWidth: 240
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "eyebrow",
+    style: {
+      marginBottom: 6,
+      color: 'var(--moss-5)',
+      fontSize: 9
+    }
+  }, "\u043F\u0430\u043C\u044F\u0442\u044C"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: light,
+    disabled: lit,
+    "aria-label": "\u0417\u0430\u0436\u0435\u0447\u044C \u0441\u0432\u0435\u0447\u0443 \u0432 \u043F\u0430\u043C\u044F\u0442\u044C",
+    style: {
+      background: 'none',
+      border: 'none',
+      cursor: lit ? 'default' : 'pointer',
+      padding: 0,
+      fontSize: 32,
+      lineHeight: 1,
+      opacity: lit ? 1 : 0.6,
+      animation: lit ? 'candleFlicker 1.8s ease-in-out infinite' : 'none'
+    }
+  }, lit ? '🕯️' : '🪔'), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: 'var(--serif-display)',
+      fontStyle: 'italic',
+      fontSize: 13,
+      lineHeight: 1.3,
+      fontWeight: 600
+    }
+  }, lit ? 'Спасибо' : 'Зажечь свечу'), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: 'var(--sans)',
+      fontSize: 10,
+      letterSpacing: '0.1em',
+      color: 'var(--moss-5)',
+      marginTop: 2
+    }
+  }, count.toLocaleString('ru-RU'), " \u0437\u0430\u0436\u0436\u0435\u043D\u043E"))), /*#__PURE__*/React.createElement("style", null, `@keyframes candleFlicker { 0%, 100% { opacity: 1; transform: rotate(-1deg); } 50% { opacity: 0.86; transform: rotate(1deg); } }`));
+}
+window.MemorialCandle = MemorialCandle;
+function LetterFragment() {
+  const isMobile = typeof window.useMobile === 'function' ? window.useMobile() : false;
+  const [show, setShow] = React.useState(false);
+  const fragments = [{
+    txt: 'Кланяюсь тебе и всем нашим. Французов гнали до самого Парижу, и я живой.',
+    who: 'Антон Бережной — жене Дарье',
+    y: 1813
+  }, {
+    txt: 'Холодно, но платье тёплое сами шили — спасибо. Газ был, наши с обоза баб привезли с тряпками.',
+    who: 'Иван Лысенко — матери',
+    y: 1915
+  }, {
+    txt: 'Лидочка. Армия наша в Барвенкове в кольце, прорывы идут вторые сутки. Если что — береги Олю.',
+    who: 'Авксентий Городнянский — жене',
+    y: 1942
+  }, {
+    txt: 'Третий год живём на новых землях, степь сухая, хлеб родит лишь с дождями. Мать всё плачет — туды бы, на Богучарку.',
+    who: 'Степан Демченко — сыну',
+    y: 1825
+  }, {
+    txt: 'Прислали 47 фамилий — из них 12 раньше нигде не значились. Если можно, добавьте в мемориал.',
+    who: 'Школьники МКОУ — архиву',
+    y: 2024
+  }, {
+    txt: 'Бьёт челом полковой писарь Фёдор Татарчуков о хуторе своём, ниже слободы Талов на речке Богучарке.',
+    who: 'Фёдор Татарчуков — Острогожской канцелярии',
+    y: 1755
+  }];
+  const pickRef = React.useRef(null);
+  if (!pickRef.current) pickRef.current = fragments[Math.floor(Math.random() * fragments.length)];
+  const pick = pickRef.current;
+  React.useEffect(() => {
+    if (isMobile) return;
+    const t = setTimeout(() => setShow(true), 4500);
+    return () => clearTimeout(t);
+  }, [isMobile]);
+  if (isMobile || !show) return null;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: 'fixed',
+      left: 100,
+      bottom: 30,
+      zIndex: 60,
+      maxWidth: 360,
+      padding: '14px 18px',
+      background: 'rgba(244,234,213,0.94)',
+      border: '1px solid var(--hairline-2)',
+      borderLeft: '3px solid var(--accent)',
+      boxShadow: '0 10px 24px rgba(60,40,20,0.18)',
+      backdropFilter: 'blur(4px)',
+      animation: 'fragmentFade 0.8s ease-out',
+      cursor: 'pointer'
+    },
+    onClick: () => setShow(false),
+    title: "\u0421\u043A\u0440\u044B\u0442\u044C"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "eyebrow",
+    style: {
+      marginBottom: 6,
+      fontSize: 9,
+      color: 'var(--accent)'
+    }
+  }, "\u0444\u0440\u0430\u0433\u043C\u0435\u043D\u0442 \u043F\u0438\u0441\u044C\u043C\u0430 \xB7 ", pick.y), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: "'Old Standard TT', serif",
+      fontStyle: 'italic',
+      fontSize: 13.5,
+      lineHeight: 1.55,
+      color: 'var(--ink)',
+      margin: '0 0 6px'
+    }
+  }, "\xAB", pick.txt, "\xBB"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: 'var(--serif-text)',
+      fontStyle: 'italic',
+      fontSize: 11,
+      color: 'var(--ink-soft)',
+      textAlign: 'right'
+    }
+  }, "\u2014 ", pick.who), /*#__PURE__*/React.createElement("style", null, `@keyframes fragmentFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`));
+}
+window.LetterFragment = LetterFragment;
 Object.assign(window, {
   Splash,
   ScrollProgress,
@@ -16553,6 +16806,8 @@ Object.assign(window, {
   Counter,
   ThisDayWidget,
   MyArchive,
+  MemorialCandle,
+  LetterFragment,
   OnboardingTour,
   ArchivalCursor,
   DecadeTicker,
@@ -17036,7 +17291,7 @@ function NeighborsSection() {
     kin: true
   }, {
     name: 'Писаревка',
-    founded: 1726,
+    founded: 1749,
     peak: 4500,
     peakYear: 1916,
     today: 870,
@@ -17052,7 +17307,7 @@ function NeighborsSection() {
     district: 'центр района'
   }, {
     name: 'Богучар',
-    founded: 1717,
+    founded: 1704,
     peak: 12000,
     peakYear: 1989,
     today: 11000,
@@ -17060,7 +17315,7 @@ function NeighborsSection() {
     district: 'Богучарский (центр)'
   }, {
     name: 'Новобелая',
-    founded: 1757,
+    founded: 1732,
     peak: 3200,
     peakYear: 1900,
     today: 540,
@@ -17073,49 +17328,49 @@ function NeighborsSection() {
       name: 'От «тальник» — кустарниковая ива, обильно растущая по поймам Богучарки.',
       peak: 'В 1916 году — 6778 жителей при 800 дворах. Маслобойня купца Поливанова, ссыпной пункт, четыре ярмарки в год, Никольская церковь 1783 г.',
       fate: 'Райцентр Писаревского района 1935-1956. После упразднения района — крупное село без железной дороги, потеря 78% населения за столетие.',
-      today: 'Центр Таловского сельского поселения, в составе которого также Бугаевка и Чехуровка. Школа на 350 учеников, ФАП, ДК, водонапорная башня (2024).'
+      today: 'Центр Таловского сельского поселения, в составе которого также Бугаевка и Чехуровка (не путать с одноимённой Бугаевкой Бугаевского сельского поселения, основанной в 1775 г. Филиппом Бугаем — это разные сёла). Школа на 350 учеников, ФАП, ДК, водонапорная башня (2024).'
     },
     'Писаревка': {
-      founded: 'Около 1726 года, малороссийскими переселенцами Острогожского полка.',
-      name: 'По фамилии полкового писаря Писарева, получившего здесь землю.',
-      peak: '1916 — около 4500 жителей, 380 дворов. Во владении помещика Лофицкого, в 1848 году вспыхнуло крестьянское восстание против помещика — отголосок дошёл до Талов.',
-      fate: 'Никогда не был райцентром, всегда в тени Талов. Земская школа с 1898 года.',
-      today: 'Около 870 жителей. Сохранился старинный храм в руинах, остатки помещичьей усадьбы.'
+      founded: 'Около 1749 года. Основана Фёдором Евстафьевичем Татарчуковым, писарем Острогожского полка, который построил здесь скотный двор.',
+      name: 'По фамилии-должности «писарь» — Татарчуков занимал эту должность в Острогожском полку.',
+      peak: '1916 — около 4500 жителей, 380 дворов. Во владении помещика Бедряги, в 1848 году вспыхнуло крестьянское восстание против помещика — отголосок дошёл до Талов.',
+      fate: 'Никогда не был райцентром, всегда в тени Талов. Писаревский совхоз создан в 1921 г. — один из крупнейших агропредприятий региона. Восстание 1848 г.: 1599 крестьян восстали против помещика Бедряги, убили его управляющего. Подавлено военной силой; 1000 крестьян подвергнуты телесному наказанию, 4 руководителя преданы военному суду.',
+      today: 'Около 1464 жителей (2018). Сельхозкооператив, школа, библиотека, ДК, медпункт. Каменная Предтеченская церковь 1801 г. в руинах. С 2015 г. в Писаревке открыт Дом-интернат для престарелых «Кантемировский». Уроженцы: **Кузьма Викторович Шпак** (1918—10.04.1944) — Герой Советского Союза посмертно (присвоено 20.04.1945) за десант Ольшанского в Николаеве, март 1944. **Анна Тихоновна Покрашенко** (1928—1998) — Герой Социалистического Труда, свинарка совхоза.'
     },
     'Кантемировка': {
-      founded: 'Около 1742 года. Названа по фамилии молдавского господаря Кантемира.',
-      name: 'От Дмитрия Кантемира, молдавского господаря, чьи земельные наделы на Острогожской слободе перешли к роду.',
-      peak: '1959 — 7100 жителей. Главный фактор роста — железнодорожная станция (с 1872 г.) на ветке Россошь–Чертково, потом узловая станция, элеватор.',
-      fate: 'С 1928 года — райцентр Кантемировского района Воронежской области. В декабре 1942 года освобождена 17-м танковым корпусом — отсюда «Гвардейская Кантемировская дивизия».',
-      today: 'Около 9700 жителей — единственный из соседей превзошёл свой пик. Узел Юго-Восточной ж/д, 4 школы, поликлиника, элеватор, Кантемировский молочный комбинат.'
+      founded: 'Основана в 1742 году Константином Антиоховичем Кантемиром (старшим сыном молдавского господаря). Первоначально называлась Константиновка-Кантемировка; имя «Кантемировка» закрепилось в 1926 г.',
+      name: 'По фамилии молдавского господарского рода Кантемиров; земельные наделы перешли к роду через жалованную грамоту.',
+      peak: '1989 — 13 465 жителей. Главный фактор роста — железнодорожная станция с 1871 года (Лиски—Чертково), узловая станция и элеватор. Свято-Троицкая церковь 1863 г.',
+      fate: 'С 1928 — райцентр Кантемировского района. 19 декабря 1942 г. освобождена в ходе операции «Малый Сатурн» 17-м тк генерала П. П. Полубоярова. В январе 1943 корпус получил гвардейское звание и наименование «Кантемировский» — единственный случай, когда слобода дала имя элитному соединению РККА. 8 сентября 1946 в Москве прошёл уникальный парад целой Кантемировской танковой дивизии (≈1000 машин).',
+      today: 'Население 10 191 (2025). Узел Юго-Восточной ж/д, 3 школы (лицей + СОШ №2 + ООШ), Молочный комбинат, элеватор. Танк-памятник Т-34-85 (открыт 17.08.1958), Аллея Героев (1992), мемориал «Братская могила» (1952). 6 сентября 2014 г. присвоено почётное звание «Населённый пункт воинской доблести».'
     },
     'Богучар': {
-      founded: 'Около 1717 года как крепость на правом берегу Дона.',
+      founded: 'Около 1704 года; статус города — с 1779 г. Богучарская слобода возникла в 1716—1717 гг. от черкасов Острогожского полка.',
       name: 'От реки Богучар (тюрк. «бугу-чар» — «олений ручей» или «изобильная река»).',
-      peak: '1989 — около 12 000 жителей. Уездный город Воронежской губернии с 1779, в советское время — райцентр.',
-      fate: 'Уездный город, потом райцентр. С 1779 г. сохранил статус и развивался устойчиво. Михаил Шолохов учился в богучарской гимназии в 1915-1918 гг.',
-      today: 'Около 11 000 жителей. Богучарская школа № 1 (бывшая гимназия), краеведческий музей, кирпичный завод. Дом-музей Шолохова.'
+      peak: '1989 — 12 000 жителей. Уездный город Воронежской губернии с 1779. М. А. Шолохов учился в богучарской мужской классической гимназии с сентября 1915 по начало 1918 года (2,5 года, 4 класса), жил в семье местного священника. Ул. Прокопенко, 15 — мемориальная табличка.',
+      fate: 'Уездный город, потом райцентр. Богучарский районно-краеведческий музей основан в 1911 г. (старейший в районе) — 20 тыс. экспонатов основного фонда. Оккупирован 10.07—19.12.1942. С 2002 — в списке исторических городов России. С 2022 — почётное звание «Населённый пункт воинской доблести».',
+      today: 'Население 11 048 (2025). Богучарская СОШ №1 (бывшая гимназия, ул. Шолохова), краеведческий музей, кирпичный завод, дом-музей Шолохова. Прообраз Григория Мелехова из «Тихого Дона» — донской казак Харлампий Ермаков, с которым Шолохов познакомился в феврале 1923 г.'
     },
     'Новобелая': {
-      founded: 'Около 1757 года однодворцами Бирюченского уезда.',
+      founded: 'Около 1732 года казачьим офицером Иваном Тевяшевым по приказу селиться у меловых гор. К 1747 — уже 250 дворов.',
       name: 'От «новая Белая» — на белой меловой горе, в отличие от соседних чернозёмных сёл.',
-      peak: '1900 — около 3200 жителей, 410 дворов. Меловой карьер, конопляное поле, две ветряные мельницы.',
+      peak: 'На рубеже XIX-XX вв.: 4 маслобойни, более 50 ветряных мельниц, 2 шерсточёски. Ярмарки: скот, соль, керосин. К 1900 — около 3200 жителей.',
       fate: 'Глубокая степь, без железной дороги. После коллективизации население пошло на убыль, к 1990-м потеряли молодёжь.',
-      today: 'Около 540 жителей. Сохранилась старая мельница (руины), действует малокомплектная школа.'
+      today: 'Население ≈ 1108-1315 (2018). Капремонт ДК 2016 (13.9 млн ₽), родники, парк. Около села — самый полный в области набор пустынных солелюбов (степные галофиты). Уроженец — Никита Васильевич Никитченко (1903—26.06.1944) — Герой Советского Союза посмертно: 26 июня 1944 г. у деревни Погостище Псковского района бросился под немецкий танк с двумя противотанковыми минами и подорвал его. Бюст в селе.'
     },
     'Скнаровка': {
       founded: '1750 год — переход таловских крестьян во главе с Алексеем Скнарой на новое место. Дочернее село Талов, в 5 км к востоку.',
       name: 'По фамилии вожака переселенцев — Алексея Скнары. Само прозвище восходит к укр. «скнара» — скряга, скупой.',
       peak: 'Начало XX века — 1725 жителей. В 1896 году построена мельница, ежегодно проходили две ярмарки.',
       fate: '11 декабря 1920 года под Скнаровкой повстанческий отряд атамана Ивана Колесникова захватил воронежского губвоенкома Ф. М. Мордовцева и убил председателя губчека Н. Е. Алексеевского — кульминация «Колесниковщины». В Великую Отечественную ушли на фронт 213 человек, не вернулись 114.',
-      today: 'Около 429 жителей (2010). Школа, ФАП, магазин, ДК, библиотека. Памятник Героям гражданской войны (1967), братская могила ВОВ. Уроженец села — Герасим Гладких, кавалер четырёх Георгиевских крестов и британской Distinguished Conduct Medal (1916).'
+      today: 'Около 429 жителей (2010). Школа, ФАП, магазин, ДК, библиотека. Памятник Героям гражданской войны (1967), братская могила ВОВ. Уроженец села — Герасим Иванович Гладких (17.03.1888—02.06.1966), кавалер четырёх Георгиевских крестов (степени 1, 2, 3, 4 — № 10438, 66572 и др.) и британской Distinguished Conduct Medal (приказ 23.02.1916). После 1-й мировой осел в Волочиске.'
     },
     'Смаглеевка': {
       founded: '1760 год — переход жителей слободы Талы. К 1772 году объединение двух хуторов — 42 двора. Дочернее село Талов, в 12 км северо-западнее Кантемировки.',
       name: 'От прозвища первопоселенца Смаглей (укр. «смаглий» — смуглый), типичного для черкасских поселений Богучарского уезда.',
       peak: '1926 — 3005 жителей, 489 дворов. В 1786 г. построена деревянная Покровская церковь, в 1823 г. — каменная. 14 октября — престольный праздник, ярмарка собирала окрестные сёла. 15 рекрутов из села воевали с Наполеоном.',
       fate: 'В Великую Отечественную из села ушли 281 человек, не вернулись (вместе со Скнаровкой) 335. Каменный храм в советское время — склад, мастерская, пекарня; снесён в середине 1970-х. Уроженец — Алексей Бойченко (1928), Герой Социалистического Труда 1948 г.',
-      today: 'Около 1048 жителей (2010). Центр Смаглеевского сельского поселения (вместе со Скнаровкой). Школа, ФАП, клуб, библиотека, Сбербанк, почта. Действует Свято-Покровская часовня (РПЦ).'
+      today: 'Около 1048 жителей (2010). Центр Смаглеевского сельского поселения (вместе со Скнаровкой). Школа, ФАП, клуб, библиотека, Сбербанк, почта. Действует Свято-Покровская часовня — настоятель иерей Алексий Юрьевич Жиляев (р. 26.03.1984, иерейская хиротония 1.08.2008). Богослужения по субботам в 10:00. Каменный Покровский храм 1823 г. снесён в 1970-е после использования как склад/мастерская.'
     }
   };
   const [activeName, setActiveName] = React.useState('Талы');
@@ -17244,7 +17499,7 @@ function NeighborsSection() {
       color: 'var(--ink-2)',
       fontStyle: 'italic'
     }
-  }, "\u0417\u0430\u043A\u043E\u043D\u043E\u043C\u0435\u0440\u043D\u043E\u0441\u0442\u044C \u043E\u0447\u0435\u0432\u0438\u0434\u043D\u0430: \u0442\u043E\u043B\u044C\u043A\u043E \u041A\u0430\u043D\u0442\u0435\u043C\u0438\u0440\u043E\u0432\u043A\u0430 \u0441 \u0436\u0435\u043B\u0435\u0437\u043D\u043E\u0439 \u0434\u043E\u0440\u043E\u0433\u043E\u0439 (\u0441 1872 \u0433.) \u0432\u044B\u0440\u043E\u0441\u043B\u0430 \u043F\u043E\u0441\u043B\u0435 \u043F\u0438\u043A\u0430. \u0412\u0441\u0435 \u0441\u0442\u0435\u043F\u043D\u044B\u0435 \u0441\u0451\u043B\u0430 \u0431\u0435\u0437 \u0441\u0442\u0430\u043D\u0446\u0438\u0438 \u043F\u043E\u0442\u0435\u0440\u044F\u043B\u0438 60\u201385% \u043D\u0430\u0441\u0435\u043B\u0435\u043D\u0438\u044F \u0437\u0430 \u0441\u0442\u043E\u043B\u0435\u0442\u0438\u0435. \u0421\u043A\u043D\u0430\u0440\u043E\u0432\u043A\u0430 \u0438 \u0421\u043C\u0430\u0433\u043B\u0435\u0435\u0432\u043A\u0430 \u2014 \u0434\u0432\u0435 \xAB\u0434\u043E\u0447\u0435\u0440\u0438\xBB \u0422\u0430\u043B\u043E\u0432: \u043E\u0442\u0434\u0435\u043B\u0438\u043B\u0438\u0441\u044C \u0432 1750 \u0438 1760 \u0433\u043E\u0434\u0430\u0445, \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u043B\u0438 \u0441\u0443\u0434\u044C\u0431\u0443 \u043C\u0430\u0442\u0435\u0440\u0438\u043D\u0441\u043A\u043E\u0433\u043E \u0441\u0435\u043B\u0430."), /*#__PURE__*/React.createElement("div", {
+  }, "\u0417\u0430\u043A\u043E\u043D\u043E\u043C\u0435\u0440\u043D\u043E\u0441\u0442\u044C \u043E\u0447\u0435\u0432\u0438\u0434\u043D\u0430: \u0442\u043E\u043B\u044C\u043A\u043E \u041A\u0430\u043D\u0442\u0435\u043C\u0438\u0440\u043E\u0432\u043A\u0430 \u0441 \u0436\u0435\u043B\u0435\u0437\u043D\u043E\u0439 \u0434\u043E\u0440\u043E\u0433\u043E\u0439 (\u0441 1871 \u0433.) \u0432\u044B\u0440\u043E\u0441\u043B\u0430 \u043F\u043E\u0441\u043B\u0435 \u043F\u0438\u043A\u0430. \u0412\u0441\u0435 \u0441\u0442\u0435\u043F\u043D\u044B\u0435 \u0441\u0451\u043B\u0430 \u0431\u0435\u0437 \u0441\u0442\u0430\u043D\u0446\u0438\u0438 \u043F\u043E\u0442\u0435\u0440\u044F\u043B\u0438 60\u201385% \u043D\u0430\u0441\u0435\u043B\u0435\u043D\u0438\u044F \u0437\u0430 \u0441\u0442\u043E\u043B\u0435\u0442\u0438\u0435. \u0421\u043A\u043D\u0430\u0440\u043E\u0432\u043A\u0430 \u0438 \u0421\u043C\u0430\u0433\u043B\u0435\u0435\u0432\u043A\u0430 \u2014 \u0434\u0432\u0435 \xAB\u0434\u043E\u0447\u0435\u0440\u0438\xBB \u0422\u0430\u043B\u043E\u0432: \u043E\u0442\u0434\u0435\u043B\u0438\u043B\u0438\u0441\u044C \u0432 1750 \u0438 1760 \u0433\u043E\u0434\u0430\u0445, \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u043B\u0438 \u0441\u0443\u0434\u044C\u0431\u0443 \u043C\u0430\u0442\u0435\u0440\u0438\u043D\u0441\u043A\u043E\u0433\u043E \u0441\u0435\u043B\u0430."), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 40,
       padding: isMobile ? '24px 20px' : '40px 50px',
@@ -17337,7 +17592,197 @@ function NeighborsSection() {
       letterSpacing: '0.1em',
       textTransform: 'uppercase'
     }
-  }, "\u041A\u043B\u0438\u043A\u043D\u0438\u0442\u0435 \u043F\u043E \u0434\u0440\u0443\u0433\u043E\u043C\u0443 \u0441\u0435\u043B\u0443 \u0432\u044B\u0448\u0435, \u0447\u0442\u043E\u0431\u044B \u043F\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u0442\u044C \u0435\u0433\u043E \u043F\u0440\u043E\u0444\u0438\u043B\u044C."))));
+  }, "\u041A\u043B\u0438\u043A\u043D\u0438\u0442\u0435 \u043F\u043E \u0434\u0440\u0443\u0433\u043E\u043C\u0443 \u0441\u0435\u043B\u0443 \u0432\u044B\u0448\u0435, \u0447\u0442\u043E\u0431\u044B \u043F\u043E\u0441\u043C\u043E\u0442\u0440\u0435\u0442\u044C \u0435\u0433\u043E \u043F\u0440\u043E\u0444\u0438\u043B\u044C.")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 40,
+      padding: isMobile ? '24px 18px' : '32px 36px',
+      background: 'var(--paper)',
+      border: '1px solid var(--hairline-2)',
+      borderTop: '3px solid var(--moss-2)'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "eyebrow",
+    style: {
+      marginBottom: 12,
+      color: 'var(--moss-2)'
+    }
+  }, "\u0442\u0430\u043B\u043E\u0432\u0441\u043A\u0430\u044F \u0434\u0438\u0430\u0441\u043F\u043E\u0440\u0430"), /*#__PURE__*/React.createElement("h3", {
+    style: {
+      fontFamily: "'Old Standard TT', serif",
+      fontStyle: 'italic',
+      fontSize: isMobile ? 22 : 28,
+      fontWeight: 700,
+      color: 'var(--wood-4)',
+      margin: '0 0 18px',
+      lineHeight: 1.25
+    }
+  }, "\u041A\u0443\u0434\u0430 \u0443\u0435\u0437\u0436\u0430\u043B\u0438 \u0442\u0430\u043B\u043E\u0432\u0446\u044B"), /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 800 280",
+    style: {
+      width: '100%',
+      height: 'auto',
+      maxWidth: 800,
+      margin: '0 auto',
+      display: 'block'
+    },
+    "aria-label": "\u041A\u0430\u0440\u0442\u0430 \u043C\u0438\u0433\u0440\u0430\u0446\u0438\u0438 \u0442\u0430\u043B\u043E\u0432\u0446\u0435\u0432"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M 50 180 Q 200 80 400 100 T 760 140",
+    stroke: "var(--hairline-2)",
+    strokeWidth: "1",
+    fill: "none",
+    strokeDasharray: "2 4"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "120",
+    cy: "155",
+    r: "8",
+    fill: "var(--accent)"
+  }), /*#__PURE__*/React.createElement("text", {
+    x: "120",
+    y: "180",
+    textAnchor: "middle",
+    fontFamily: "Old Standard TT, serif",
+    fontStyle: "italic",
+    fontSize: "13",
+    fill: "var(--wood-4)",
+    fontWeight: "700"
+  }, "\u0422\u0430\u043B\u044B"), /*#__PURE__*/React.createElement("text", {
+    x: "120",
+    y: "143",
+    textAnchor: "middle",
+    fontFamily: "Old Standard TT, serif",
+    fontStyle: "italic",
+    fontSize: "9",
+    fill: "var(--ink-soft)"
+  }, "1747"), /*#__PURE__*/React.createElement("circle", {
+    cx: "350",
+    cy: "200",
+    r: "6",
+    fill: "var(--moss-2)"
+  }), /*#__PURE__*/React.createElement("text", {
+    x: "350",
+    y: "222",
+    textAnchor: "middle",
+    fontFamily: "Old Standard TT, serif",
+    fontStyle: "italic",
+    fontSize: "12",
+    fill: "var(--wood-4)"
+  }, "\u0410\u0441\u0442\u0440\u0430\u0445\u0430\u043D\u044C"), /*#__PURE__*/React.createElement("text", {
+    x: "350",
+    y: "194",
+    textAnchor: "middle",
+    fontFamily: "Old Standard TT, serif",
+    fontStyle: "italic",
+    fontSize: "9",
+    fill: "var(--ink-soft)"
+  }, "1823 \xB7 61 \u0441\u0435\u043C\u044C\u044F"), /*#__PURE__*/React.createElement("path", {
+    d: "M 128 153 Q 240 130 343 197",
+    stroke: "var(--accent)",
+    strokeWidth: "1.8",
+    fill: "none",
+    strokeDasharray: "6 3",
+    markerEnd: "url(#arr1)"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "560",
+    cy: "170",
+    r: "6",
+    fill: "var(--wood-3)"
+  }), /*#__PURE__*/React.createElement("text", {
+    x: "560",
+    y: "192",
+    textAnchor: "middle",
+    fontFamily: "Old Standard TT, serif",
+    fontStyle: "italic",
+    fontSize: "12",
+    fill: "var(--wood-4)"
+  }, "\u041A\u0430\u0437\u0430\u0445\u0441\u0442\u0430\u043D"), /*#__PURE__*/React.createElement("text", {
+    x: "560",
+    y: "164",
+    textAnchor: "middle",
+    fontFamily: "Old Standard TT, serif",
+    fontStyle: "italic",
+    fontSize: "9",
+    fill: "var(--ink-soft)"
+  }, "1948 \xB7 \u0413\u043B\u0443\u0445\u043E\u0432\u0446\u043E\u0432\u044B"), /*#__PURE__*/React.createElement("path", {
+    d: "M 128 152 Q 320 60 555 165",
+    stroke: "var(--moss-2)",
+    strokeWidth: "1.8",
+    fill: "none",
+    strokeDasharray: "6 3",
+    markerEnd: "url(#arr2)"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "700",
+    cy: "120",
+    r: "5",
+    fill: "var(--ink-soft)"
+  }), /*#__PURE__*/React.createElement("text", {
+    x: "700",
+    y: "108",
+    textAnchor: "middle",
+    fontFamily: "Old Standard TT, serif",
+    fontStyle: "italic",
+    fontSize: "11",
+    fill: "var(--wood-4)"
+  }, "\u0414\u0430\u043B\u044C\u043D\u0438\u0439 \u0412\u043E\u0441\u0442\u043E\u043A"), /*#__PURE__*/React.createElement("text", {
+    x: "700",
+    y: "142",
+    textAnchor: "middle",
+    fontFamily: "Old Standard TT, serif",
+    fontStyle: "italic",
+    fontSize: "9",
+    fill: "var(--ink-soft)"
+  }, "1910 \xB7 \u043F\u0435\u0440\u0435\u0441\u0435\u043B\u0435\u043D\u0446\u044B"), /*#__PURE__*/React.createElement("path", {
+    d: "M 130 150 Q 380 30 695 118",
+    stroke: "var(--ink-soft)",
+    strokeWidth: "1.4",
+    fill: "none",
+    strokeDasharray: "5 3",
+    markerEnd: "url(#arr3)",
+    opacity: "0.7"
+  }), /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("marker", {
+    id: "arr1",
+    markerWidth: "8",
+    markerHeight: "8",
+    refX: "7",
+    refY: "4",
+    orient: "auto"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M 0 0 L 8 4 L 0 8 z",
+    fill: "var(--accent)"
+  })), /*#__PURE__*/React.createElement("marker", {
+    id: "arr2",
+    markerWidth: "8",
+    markerHeight: "8",
+    refX: "7",
+    refY: "4",
+    orient: "auto"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M 0 0 L 8 4 L 0 8 z",
+    fill: "var(--moss-2)"
+  })), /*#__PURE__*/React.createElement("marker", {
+    id: "arr3",
+    markerWidth: "8",
+    markerHeight: "8",
+    refX: "7",
+    refY: "4",
+    orient: "auto"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M 0 0 L 8 4 L 0 8 z",
+    fill: "var(--ink-soft)"
+  })))), /*#__PURE__*/React.createElement("p", {
+    style: {
+      marginTop: 18,
+      fontFamily: 'var(--serif-text)',
+      fontSize: 13,
+      lineHeight: 1.6,
+      color: 'var(--ink-2)',
+      fontStyle: 'italic',
+      textAlign: 'center',
+      maxWidth: 700,
+      marginLeft: 'auto',
+      marginRight: 'auto'
+    }
+  }, "\u0418\u0437\u0432\u0435\u0441\u0442\u043D\u044B\u0435 \u043D\u0430\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u044F \u043F\u0435\u0440\u0435\u0441\u0435\u043B\u0435\u043D\u0438\u044F \u0442\u0430\u043B\u043E\u0432\u0446\u0435\u0432: 61 \u0441\u0435\u043C\u044C\u044F \u0432 \u0410\u0441\u0442\u0440\u0430\u0445\u0430\u043D\u0441\u043A\u0443\u044E \u0433\u0443\u0431\u0435\u0440\u043D\u0438\u044E (1822-1823, \u0443\u043A\u0430\u0437 \u0410\u043B\u0435\u043A\u0441\u0430\u043D\u0434\u0440\u0430 I); \u0447\u0430\u0441\u0442\u044C \u0440\u043E\u0434\u0430 \u0413\u043B\u0443\u0445\u043E\u0432\u0446\u043E\u0432\u044B\u0445 \u2014 \u0432 \u041A\u0430\u0437\u0430\u0445\u0441\u043A\u0443\u044E \u0421\u0421\u0420 (1948-1950, \u043F\u043E\u0441\u043B\u0435\u0432\u043E\u0435\u043D\u043D\u0430\u044F \u043C\u0438\u0433\u0440\u0430\u0446\u0438\u044F); \u043F\u043E \u0421\u0442\u043E\u043B\u044B\u043F\u0438\u043D\u0441\u043A\u043E\u0439 \u0440\u0435\u0444\u043E\u0440\u043C\u0435 (1907-1916) \u2014 \u043D\u0430 \u0414\u0430\u043B\u044C\u043D\u0438\u0439 \u0412\u043E\u0441\u0442\u043E\u043A."))));
 }
 window.NeighborsSection = NeighborsSection;
 </script>
@@ -18169,7 +18614,7 @@ function App() {
     style: {
       position: 'relative'
     }
-  }, /*#__PURE__*/React.createElement(Splash, null), /*#__PURE__*/React.createElement(OnboardingTour, null), /*#__PURE__*/React.createElement(ArchivalCursor, null), /*#__PURE__*/React.createElement(DecadeTicker, null), /*#__PURE__*/React.createElement(KonamiMode, null), /*#__PURE__*/React.createElement(IdleAmbient, null), /*#__PURE__*/React.createElement(ThisDayWidget, null), /*#__PURE__*/React.createElement(MyArchive, null), /*#__PURE__*/React.createElement(ChapteredProgress, null), /*#__PURE__*/React.createElement(StickyTOC, null), /*#__PURE__*/React.createElement(Enhancements, null), /*#__PURE__*/React.createElement(TalnikGame, null), /*#__PURE__*/React.createElement(TalnikDecor, null), /*#__PURE__*/React.createElement(SearchPalette, null), /*#__PURE__*/React.createElement(PDFButton, null), /*#__PURE__*/React.createElement(PodcastTTS, null), /*#__PURE__*/React.createElement(SocialShare, null), /*#__PURE__*/React.createElement(Lightbox, null), /*#__PURE__*/React.createElement(Hero, {
+  }, /*#__PURE__*/React.createElement(Splash, null), /*#__PURE__*/React.createElement(OnboardingTour, null), /*#__PURE__*/React.createElement(ArchivalCursor, null), /*#__PURE__*/React.createElement(DecadeTicker, null), /*#__PURE__*/React.createElement(KonamiMode, null), /*#__PURE__*/React.createElement(IdleAmbient, null), /*#__PURE__*/React.createElement(ThisDayWidget, null), /*#__PURE__*/React.createElement(MyArchive, null), /*#__PURE__*/React.createElement(MemorialCandle, null), /*#__PURE__*/React.createElement(LetterFragment, null), /*#__PURE__*/React.createElement(ChapteredProgress, null), /*#__PURE__*/React.createElement(StickyTOC, null), /*#__PURE__*/React.createElement(Enhancements, null), /*#__PURE__*/React.createElement(TalnikGame, null), /*#__PURE__*/React.createElement(TalnikDecor, null), /*#__PURE__*/React.createElement(SearchPalette, null), /*#__PURE__*/React.createElement(PDFButton, null), /*#__PURE__*/React.createElement(PodcastTTS, null), /*#__PURE__*/React.createElement(SocialShare, null), /*#__PURE__*/React.createElement(Lightbox, null), /*#__PURE__*/React.createElement(Hero, {
     variant: "book"
   }), /*#__PURE__*/React.createElement(HistorySection, null), /*#__PURE__*/React.createElement(NeighborsSection, null), /*#__PURE__*/React.createElement(GrainSection, null), /*#__PURE__*/React.createElement(TodaySection, null), /*#__PURE__*/React.createElement(NatureSection, null), /*#__PURE__*/React.createElement(PeopleSection, null), /*#__PURE__*/React.createElement(CuisineSection, null), /*#__PURE__*/React.createElement(GallerySection, null), /*#__PURE__*/React.createElement(EventsSection, null), /*#__PURE__*/React.createElement(NewsSection, null), /*#__PURE__*/React.createElement(StoriesSection, null), /*#__PURE__*/React.createElement(DynastiesSection, null), /*#__PURE__*/React.createElement(ObjectsGallery, null), /*#__PURE__*/React.createElement(DialectGlossary, null), /*#__PURE__*/React.createElement(FactsSection, null), /*#__PURE__*/React.createElement(DemographySection, null), /*#__PURE__*/React.createElement(RecordsSection, null), /*#__PURE__*/React.createElement(ThenNowSection, null), /*#__PURE__*/React.createElement(CalendarSection, null), /*#__PURE__*/React.createElement(DialectSection, null), /*#__PURE__*/React.createElement(LettersSection, null), /*#__PURE__*/React.createElement(FamilyTreeSection, null), /*#__PURE__*/React.createElement(Walk1910Section, null), /*#__PURE__*/React.createElement(JukovSection, null), /*#__PURE__*/React.createElement(MemorialSection, null), /*#__PURE__*/React.createElement(DraftSection, null), /*#__PURE__*/React.createElement(ChurchSection, null), /*#__PURE__*/React.createElement(LostPlacesSection, null), /*#__PURE__*/React.createElement(QuizSection, null), /*#__PURE__*/React.createElement(WeatherSection, null), /*#__PURE__*/React.createElement(SchoolSection, null), /*#__PURE__*/React.createElement(MapSection, null), /*#__PURE__*/React.createElement(ToponymySection, null), /*#__PURE__*/React.createElement(CraftsSection, null), /*#__PURE__*/React.createElement(ContactsSection, null));
 }
