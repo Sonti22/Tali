@@ -1,5 +1,5 @@
 /* Service Worker — кэширует HTML/JS/CSS/фото на длительный offline-просмотр */
-const VERSION = 'taly-1777287988085';
+const VERSION = 'taly-1777294502706';
 const PRECACHE = [
   './',
   './index.html',
